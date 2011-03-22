@@ -143,12 +143,11 @@ public:
 	{
 
 		StorageType::iterator iter(vals_.begin());
-		if(schema_ != cp.schema_){
-			while(iter != vals_.end()){
-				delete (*iter);
-				++iter;
-			}
+		while(iter != vals_.end()){
+			delete (*iter);
+			++iter;
 		}
+		vals_.clear();
 
 		schema_ = cp.schema_;
 		
@@ -171,6 +170,7 @@ public:
 			delete (*iter);
 			++iter;
 		}
+		vals_.clear();
 	}
 
 	/*
