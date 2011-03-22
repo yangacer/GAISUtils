@@ -21,7 +21,7 @@ endif(WIN32)
 
 # Create a target for the library
 
-add_library (GUtils ${LIB_TYPE} lexUtils.cpp fileUtils.cpp timeUtils.cpp profiler.cpp rstream.cpp) 
+add_library (GUtils ${LIB_TYPE} lexUtils.cpp fileUtils.cpp timeUtils.cpp profiler.cpp rstream.cpp rschema.cpp) 
 target_link_libraries(GUtils loki)
 
 install (TARGETS GUtils LIBRARY DESTINATION lib 

@@ -10,11 +10,12 @@
 #include "loki/SmallObj.h"
 #include "mem_helper.h"
 #include "small_vector.h"
+#include "rschema.h"
 
 #include <sstream>
 #include <functional>
 #include <string>
-
+#include <vector>
 
 class absField
 {
@@ -114,20 +115,25 @@ typedef Loki::SingletonHolder
 /// Multiple Typed Fields Record
 class record
 {
+	friend class rschema;
 protected:
 	// AssocVector cost:
 	// O(N) to insert/delete 
 	// and O(lgN) to search
-	typedef Loki::AssocVector<std::string, absField*> StorageType;
+	typedef std::vector<absField*> StorageType;
+
 public:
 	
-	record(){}
+	record()
+	: schema_(0)
+	{}
 	
 	record(record const &cp)
+	: schema_(cp.schema_)
 	{
 		StorageType::iterator iter(cp.vals_.begin());
 		while(iter != cp.vals_.end()){
-			vals_[iter->first] = iter->second->Clone();
+			vals_.push_back((*iter)->Clone());
 			++iter;
 		}
 	}
@@ -135,12 +141,25 @@ public:
 	record& 
 	operator=(record const &cp)
 	{
-		StorageType::iterator iter(cp.vals_.begin());
+
+		StorageType::iterator iter(vals_.begin());
+		if(schema_ != cp.schema_){
+			while(iter != vals_.end()){
+				delete (*iter);
+				++iter;
+			}
+		}
+
+		schema_ = cp.schema_;
+		
+		iter = cp.vals_.begin();
 		while(iter != cp.vals_.end()){
+			/*
 			if(vals_.find(iter->first) != vals_.end()){
 				delete vals_[iter->first];	
 			}
-			vals_[iter->first] = iter->second->Clone();
+			*/
+			vals_.push_back((*iter)->Clone());
 			++iter;
 		}	
 	}
@@ -149,11 +168,12 @@ public:
 	{
 		StorageType::iterator iter(vals_.begin());
 		while(iter != vals_.end()){
-			delete iter->second;
+			delete (*iter);
 			++iter;
 		}
 	}
 
+	/*
 	record& 
 	define_field(char const* field_name, char const* type_str)
 	{
@@ -165,12 +185,13 @@ public:
 		}
 		return *this;	
 	}
-	
+	*/
+
 	template<typename T>
 	typename field<T>::value_type& 
 	get(char const* field_name) throw(char const*)
 	{
-		field<T>* p(dynamic_cast<field<T>*>(vals_[field_name]));
+		field<T>* p(dynamic_cast<field<T>*>(vals_[schema_->find(field_name)]));
 		if(0 == p)
 			throw "record: Try to convert field<T> to wrong type";
 		return (p->val_);
@@ -182,7 +203,7 @@ public:
 	get(char const* field_name) const throw(char const*)
 	{
 		field<T> const* p = 
-			dynamic_cast<field<T> const*>(vals_[field_name]);
+			dynamic_cast<field<T> const*>(vals_[schema_->find(field_name)]);
 		if(0 == p)
 			throw "record: Try to convert field<T> to wrong type";
 		return (p->val_);
@@ -204,26 +225,26 @@ public:
 	bool 
 	fromString(char const* field_name, char const *cstr, size_t size)
 	{
-		return vals_[field_name]->fromString(cstr, size);
+		return vals_[schema_->find(field_name)]->fromString(cstr, size);
 	}
 	
 	bool 
 	fromString(char const* field_name, std::string const &str)
 	{
-		return vals_[field_name]->fromString(str);	
+		return vals_[schema_->find(field_name)]->fromString(str);	
 	}
 
 	
 	std::string 
 	toString(char const* field_name) const
 	{
-		return vals_[field_name]->toString();	
+		return vals_[schema_->find(field_name)]->toString();	
 	}
 
 	int 
 	compare(char const *field_name, record const & rhs) const
 	{
-		return vals_[field_name]->compare(rhs.vals_[field_name]);
+		return vals_[schema_->find(field_name)]->compare(rhs.vals_[schema_->find(field_name)]);
 	}
 	
 	/** Compare a field with value of type given
@@ -259,6 +280,7 @@ protected:
 	// different record fields layouts can be centrialized
 	// to a single(ton) manager
  	mutable StorageType vals_;
+	rschema *schema_;
 };
 
 
