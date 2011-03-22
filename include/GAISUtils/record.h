@@ -244,6 +244,7 @@ public:
 	int 
 	compare(char const *field_name, record const & rhs) const
 	{
+		assert(0 != schema_);
 		return vals_[schema_->find(field_name)]->compare(rhs.vals_[schema_->find(field_name)]);
 	}
 	

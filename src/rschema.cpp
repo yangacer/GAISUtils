@@ -23,6 +23,13 @@ rschema::define_field(char const* field_name, char const* type_str)
 FIELD_INDEX
 rschema::find(char const* field_name)
 {
+	Index::iterator iter = idx_.find(field_name);
+	if(iter == idx_.end()){
+		std::string msg("rschema: non-exist field name(");
+		msg += field_name;
+		msg += ")";
+		throw msg.c_str();
+	}
 	return idx_[field_name];	
 }
 
