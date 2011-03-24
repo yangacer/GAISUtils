@@ -24,7 +24,7 @@ public:
 	virtual ~absField(){}
 	virtual int compare(absField const* rhs) const = 0;
 	virtual bool fromString(char const *cstr, size_t size) = 0;
-	virtual bool fromString(std::string const &str) = 0;
+	virtual bool fromString(char const *str) = 0;
 	virtual std::string toString() const = 0;
 };
 
@@ -78,13 +78,14 @@ private: // Client never creates field object directly
 	bool 
 	fromString(char const *cstr, size_t size)
 	{
-		std::stringstream cvt(std::string(cstr, size));
+		std::stringstream cvt;
+		cvt.write(cstr, size);
 		cvt>>val_;
 		return (bool)cvt;
 	}
 
 	bool 
-	fromString(std::string const &str)
+	fromString(char const *str)
 	{
 		std::stringstream cvt(str);
 		cvt>>val_;
@@ -229,7 +230,7 @@ public:
 	}
 	
 	bool 
-	fromString(char const* field_name, std::string const &str)
+	fromString(char const* field_name, char const* str)
 	{
 		return vals_[schema_->find(field_name)]->fromString(str);	
 	}

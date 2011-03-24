@@ -10,7 +10,15 @@ rschema::rschema()
 rschema&
 rschema::define_field(char const* field_name, char const* type_str)
 {
-	try{
+	try{	
+		Index::iterator iter = idx_.find(field_name);
+		if(iter != idx_.end()){
+			std::string msg("rschema: redefine field ");
+			msg += field_name ;
+			msg += " - ";
+			msg += type_str;
+			throw msg.c_str();
+		}
 		proto_->vals_.push_back(
 			field_factory::Instance().CreateObject(type_str));
 		idx_[field_name] = proto_->vals_.size() - 1;
