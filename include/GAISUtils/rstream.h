@@ -2,6 +2,7 @@
 #include <fstream>
 #include <algorithm>
 #include <string>
+#include <ext/stdio_filebuf.h>
 
 /** Searchable buffer abstract class
  *  This class can not be instantaneoused
@@ -42,6 +43,10 @@ class searchablebuf_tmpl : public StreamBuf, public searchablebuf
 public:
 	searchablebuf_tmpl()
 	: on_searching_(0), found(true)
+	{}
+	
+	searchablebuf_tmpl(FILE* c_file)
+	: on_searching_(0), found(true), StreamBuf(c_file, std::ios::in, BUFSIZ)
 	{}
 
 	/** Generic pattern search implementation.
@@ -196,7 +201,9 @@ public:
 	irfstream(char const* pattern, size_t psize, 
 		char const *filename, std::ios_base::openmode mode = ios_base::in);
 	
-	searchablebuf_tmpl<std::filebuf> *
+	irfstream(char const* pattern, size_t psize, FILE* c_file);
+
+	searchablebuf_tmpl<__gnu_cxx::stdio_filebuf<char> > *
 	rdbuf() const;
 
 	bool 
@@ -208,13 +215,15 @@ public:
 	void 
 	open(char const* filename, std::ios_base::openmode mode = ios_base::in);
 	
+
 	void 
 	close();
 
 private:
 	irfstream(irfstream const & cp);
 	irstream & operator = (irfstream const &cp);
-	searchablebuf_tmpl<std::filebuf> fbuf_;
+	// searchablebuf_tmpl<std::filebuf> fbuf_;
+	searchablebuf_tmpl<__gnu_cxx::stdio_filebuf<char> > fbuf_;
 
 };
 

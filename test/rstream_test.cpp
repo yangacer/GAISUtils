@@ -1,4 +1,5 @@
 #include "GAISUtils/rstream.h"
+#include <iostream>
 
 void usage()
 {
@@ -67,5 +68,12 @@ int main(int argc, char** argv)
 		printf("%d\n", rfin.grcount());
 		read+= rfin.grcount();
 	}
+
+	rfin.close();
+	
+	irfstream fin2("@\n", 2, stdin);
+	fin2.getrecord(record, 10);
+	printf(record);
+	
 	return 0;	
 }

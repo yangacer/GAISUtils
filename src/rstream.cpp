@@ -207,9 +207,19 @@ irfstream::irfstream(char const* pattern, size_t psize,
 	irstream::rdbuf(&fbuf_);
 }
 
-searchablebuf_tmpl<std::filebuf> *
+
+irfstream::irfstream(char const* pattern, size_t psize, FILE* c_file)
+: irstream(), fbuf_(c_file)
+{
+	begin_pattern(pattern, psize);
+	init(dynamic_cast<std::streambuf*>(&fbuf_));
+	//open(filename, mode);
+	irstream::rdbuf(&fbuf_);
+}
+
+searchablebuf_tmpl<__gnu_cxx::stdio_filebuf<char> > *
 irfstream::rdbuf() const
-{ return const_cast<searchablebuf_tmpl<std::filebuf> *>(&fbuf_); }
+{ return const_cast<searchablebuf_tmpl<__gnu_cxx::stdio_filebuf<char> > *>(&fbuf_); }
 
 
 bool 
@@ -230,6 +240,8 @@ irfstream::open(char const* filename, std::ios_base::openmode mode)
 		peek();
 	}
 }
+
+
 
 void 
 irfstream::close()
