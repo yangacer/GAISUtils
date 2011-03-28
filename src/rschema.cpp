@@ -22,6 +22,7 @@ rschema::define_field(char const* field_name, char const* type_str)
 		proto_->vals_.push_back(
 			field_factory::Instance().CreateObject(type_str));
 		idx_[field_name] = proto_->vals_.size() - 1;
+		ridx_[(FIELD_INDEX)proto_->vals_.size() - 1].assign(field_name);
 	}catch(...){
 		throw "rschema: defin_field failed";	
 	}
@@ -38,7 +39,16 @@ rschema::find(char const* field_name)
 		msg += ")";
 		throw msg.c_str();
 	}
-	return idx_[field_name];	
+	return iter->second;	
+}
+
+char const*
+rschema::find(FIELD_INDEX field_index)
+{
+	InvertIndex::iterator iter = ridx_.find(field_index);
+	if(iter == ridx_.end())
+		throw "rschema: non-exist field index";
+	return iter->second.c_str();
 }
 
 void

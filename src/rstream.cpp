@@ -39,6 +39,7 @@ irstream::begin_pattern ( char const* pattern, size_t psize )
 		psize_ = psize;
 	}
 	memcpy(pattern_, pattern, psize);
+	pattern_[psize] = 0;
 }
 
 searchablebuf* 
@@ -52,10 +53,12 @@ irstream::rdbuf() const
 searchablebuf* 
 irstream::rdbuf(searchablebuf *sb)
 {
+	
 	std::streambuf *cast(dynamic_cast<std::streambuf*>(sb));
 	searchablebuf *tmp( dynamic_cast<searchablebuf*>(std::istream::rdbuf(cast)) );
 	// touch
-	cast->sgetc();
+	if(0 == dynamic_cast<__gnu_cxx::stdio_filebuf<char>*>(sb))
+		cast->sgetc();
 	//peek();
 	state_ = INITED;
 	return tmp;

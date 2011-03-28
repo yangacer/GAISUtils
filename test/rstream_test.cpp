@@ -75,5 +75,13 @@ int main(int argc, char** argv)
 	fin2.getrecord(record, 10);
 	printf(record);
 	
+	fin2.close();
+	fin2.open(argv[1]);
+	fin2.getrecord(record, 10);
+	printf("\nOpen file after read from stdin: %d\n", fin2.is_open());
+	printf(record);
+
+	irstringstream sin("@\n", 2, "@\n@s:5467\n");
+
 	return 0;	
 }
