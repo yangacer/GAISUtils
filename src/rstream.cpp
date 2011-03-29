@@ -57,8 +57,8 @@ irstream::rdbuf(searchablebuf *sb)
 	std::streambuf *cast(dynamic_cast<std::streambuf*>(sb));
 	searchablebuf *tmp( dynamic_cast<searchablebuf*>(std::istream::rdbuf(cast)) );
 	// touch
-	if(0 == dynamic_cast<__gnu_cxx::stdio_filebuf<char>*>(sb))
-		cast->sgetc();
+	// if(0 == dynamic_cast<__gnu_cxx::stdio_filebuf<char>*>(sb))
+	cast->sgetc();
 	//peek();
 	state_ = INITED;
 	return tmp;
@@ -211,6 +211,7 @@ irfstream::irfstream(char const* pattern, size_t psize,
 }
 
 
+/*
 irfstream::irfstream(char const* pattern, size_t psize, FILE* c_file)
 : irstream(), fbuf_(c_file)
 {
@@ -219,10 +220,11 @@ irfstream::irfstream(char const* pattern, size_t psize, FILE* c_file)
 	//open(filename, mode);
 	irstream::rdbuf(&fbuf_);
 }
+*/
 
-searchablebuf_tmpl<__gnu_cxx::stdio_filebuf<char> > *
+searchablebuf_tmpl<std::filebuf> *
 irfstream::rdbuf() const
-{ return const_cast<searchablebuf_tmpl<__gnu_cxx::stdio_filebuf<char> > *>(&fbuf_); }
+{ return const_cast<searchablebuf_tmpl<std::filebuf> *>(&fbuf_); }
 
 
 bool 

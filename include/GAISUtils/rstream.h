@@ -2,7 +2,7 @@
 #include <fstream>
 #include <algorithm>
 #include <string>
-#include <ext/stdio_filebuf.h>
+//#include <ext/stdio_filebuf.h>
 
 /** Searchable buffer abstract class
  *  This class can not be instantaneoused
@@ -45,9 +45,14 @@ public:
 	: on_searching_(0), found(true)
 	{}
 	
+	/*
 	searchablebuf_tmpl(FILE* c_file)
 	: on_searching_(0), found(true), StreamBuf(c_file, std::ios::in, BUFSIZ)
-	{}
+	{
+		if(c_file != stdin)
+			throw "searchablebuf can not be initiated by FILE* other than stdin";
+	}
+	*/
 
 	/** Generic pattern search implementation.
 	 * @param pattern Record begin pattern.
@@ -70,7 +75,8 @@ public:
 		if(!found)
 			return 0;
 
-		char* ptr(std::search(StreamBuf::gptr() + on_searching_, StreamBuf::egptr(), pattern, pattern + psize));
+		char* ptr( std::search(StreamBuf::gptr() + on_searching_, 
+			StreamBuf::egptr(), pattern, pattern + psize) );
 		char *tmp(StreamBuf::egptr());
 		if(ptr == StreamBuf::egptr()){
 			found = false;
@@ -177,7 +183,10 @@ public:
 	
 	void
 	research()
-	{ state_ = INITED; std::istream::clear(); rdbuf()->restart(); peek();}
+	{ 
+		state_ = INITED; std::istream::clear(); rdbuf()->restart(); 
+		peek();
+	}
 private:
 	/** Prevent copy and assignment to this class
 	 */
@@ -203,7 +212,7 @@ public:
 	
 	irfstream(char const* pattern, size_t psize, FILE* c_file);
 
-	searchablebuf_tmpl<__gnu_cxx::stdio_filebuf<char> > *
+	searchablebuf_tmpl<std::filebuf > *
 	rdbuf() const;
 
 	bool 
@@ -222,8 +231,8 @@ public:
 private:
 	irfstream(irfstream const & cp);
 	irstream & operator = (irfstream const &cp);
-	// searchablebuf_tmpl<std::filebuf> fbuf_;
-	searchablebuf_tmpl<__gnu_cxx::stdio_filebuf<char> > fbuf_;
+	searchablebuf_tmpl<std::filebuf> fbuf_;
+	//searchablebuf_tmpl<__gnu_cxx::stdio_filebuf<char> > fbuf_;
 
 };
 

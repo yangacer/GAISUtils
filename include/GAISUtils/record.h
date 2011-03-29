@@ -101,6 +101,7 @@ private: // Client never creates field object directly
 		return cvt.str();
 	}
 
+
 	T val_;
 };
 
@@ -177,19 +178,6 @@ public:
 		vals_.clear();
 	}
 
-	/*
-	record& 
-	define_field(char const* field_name, char const* type_str)
-	{
-		try{
-			vals_[field_name] = 
-				field_factory::Instance().CreateObject(type_str);
-		}catch(...){
-			throw "record:;defin_field failed";	
-		}
-		return *this;	
-	}
-	*/
 
 	template<typename T>
 	typename field<T>::value_type& 
@@ -249,7 +237,7 @@ public:
 	compare(char const *field_name, record const & rhs) const
 	{
 		assert(0 != schema_);
-		return vals_[schema_->find(field_name)]->compare(rhs.vals_[schema_->find(field_name)]);
+		return vals_[schema_->find(field_name)]->compare(rhs.vals_[rhs.schema_->find(field_name)]);
 	}
 	
 	/** Compare a field with value of type given
@@ -279,6 +267,26 @@ public:
 		}
 		return -2;
 	}
+
+	typedef StorageType::iterator iterator;
+	typedef StorageType::const_iterator const_iterator;
+
+	StorageType::iterator
+	begin()
+	{ return vals_.begin(); }
+
+	StorageType::iterator
+	end()
+	{ return vals_.end();	}
+
+	StorageType::const_iterator
+	const_begin() const
+	{ return vals_.begin(); }
+
+	StorageType::const_iterator
+	const_end() const
+	{ return vals_.end();	}
+	
 
 protected:
 	// fields layout can be fixed
