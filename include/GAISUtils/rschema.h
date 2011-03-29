@@ -10,6 +10,7 @@ struct record;
 
 struct rschema 
 {	
+
 	template <class T, class U>
 	struct IndexCont
 	{
@@ -32,6 +33,9 @@ struct rschema
 
 	void
 	make(record& r);
+	
+	unsigned int
+	field_count() const;
 
 private:
 	Index idx_;

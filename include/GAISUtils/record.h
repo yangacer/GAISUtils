@@ -113,10 +113,13 @@ typedef Loki::SingletonHolder
 	> field_factory;
 
 
+void fromGAISRecord(record& r, char const* raw, unsigned int rsize);
+
 /// Multiple Typed Fields Record
 class record
 {
 	friend class rschema;
+	friend void fromGAISRecord(record& r, char const* raw, unsigned int rsize);
 protected:
 	// AssocVector cost:
 	// O(N) to insert/delete 

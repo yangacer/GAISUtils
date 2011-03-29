@@ -54,3 +54,7 @@ rschema::find(FIELD_INDEX field_index)
 void
 rschema::make(record& r)
 {	r = *proto_;	}
+
+unsigned int
+rschema::field_count() const
+{ return proto_->vals_.size(); }
