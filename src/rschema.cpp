@@ -29,6 +29,19 @@ rschema::define_field(char const* field_name, char const* type_str)
 
 }
 
+rschema&
+rschema::undefine_field(char const* field_name)
+{
+	Index::iterator iter = idx_.find(field_name);
+	if(iter == idx_.end())
+		return *this;
+	delete proto_->vals_[iter->second];
+	proto_->vals_.erase(proto_->vals_.begin() + iter->second);
+	ridx_.erase(iter->second);
+	idx_.erase(iter);
+	return *this;
+}
+
 FIELD_INDEX
 rschema::find(char const* field_name)
 {

@@ -26,6 +26,7 @@ public:
 	virtual bool fromString(char const *cstr, size_t size) = 0;
 	virtual bool fromString(char const *str) = 0;
 	virtual std::string toString() const = 0;
+	virtual std::ostream &writeTo(std::ostream &os) const = 0;
 };
 
 class record;
@@ -100,7 +101,10 @@ private: // Client never creates field object directly
 		cvt<<val_;
 		return cvt.str();
 	}
-
+	
+	std::ostream&
+	writeTo(std::ostream &os) const
+	{ os<<val_; return os;}
 
 	T val_;
 };
@@ -121,6 +125,7 @@ class record
 {
 	friend class rschema;
 	friend void fromGAISRecord(record& r, char const* raw, unsigned int rsize);
+	friend std::ostream& toGAISRecord(record const& r, std::ostream& os);
 protected:
 	// AssocVector cost:
 	// O(N) to insert/delete 
@@ -232,6 +237,10 @@ public:
 	{
 		return vals_[schema_->find(field_name)]->toString();	
 	}
+	
+	std::ostream&
+	writeTo(std::ostream& os, char const* field_name) const
+	{	return vals_[schema_->find(field_name)]->writeTo(os);  }
 
 	int 
 	compare(char const *field_name, record const & rhs) const

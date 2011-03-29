@@ -25,6 +25,9 @@ struct rschema
 	rschema&
 	define_field(char const* field_name, char const* type_str);
 	
+	rschema&
+	undefine_field(char const* field_name);
+
 	FIELD_INDEX
 	find(char const* field_name);
 	

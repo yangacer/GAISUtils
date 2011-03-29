@@ -71,6 +71,7 @@ int main(int argc, char** argv)
 
 	rfin.close();
 	
+	/*
 	irfstream fin2("@\n", 2, stdin);
 	fin2.getrecord(record, 10);
 	printf(record);
@@ -80,6 +81,7 @@ int main(int argc, char** argv)
 	fin2.getrecord(record, 10);
 	printf("\nOpen file after read from stdin: %d\n", fin2.is_open());
 	printf(record);
+	*/
 
 	irstringstream sin("@\n", 2, "@\n@s:5467\n");
 

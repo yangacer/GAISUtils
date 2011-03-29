@@ -4,7 +4,7 @@
 #include "record.h"
 
 inline void
-fromGAISRecord(record& r, char const* raw, unsigned int rsize)
+fromGAISRecord(record &r, char const* raw, unsigned int rsize)
 {
 
 	char const* field_name;
@@ -17,6 +17,21 @@ fromGAISRecord(record& r, char const* raw, unsigned int rsize)
 			r.fromString(field_name, raw + begOff.first, begOff.second);	
 		
 	}
+}
+
+inline std::ostream&
+toGAISRecord(record const &r, std::ostream& os)
+{
+	char const* field_name;
+	std::pair<size_t, size_t> begOff;
+
+	for(unsigned int i=0; i< (unsigned int)r.schema_->field_count();++i){
+		field_name = r.schema_->find(i);
+		os<<field_name;
+		r.writeTo(os, field_name);
+		os<<"\n";
+	}
+	return os;
 }
 
 #endif
