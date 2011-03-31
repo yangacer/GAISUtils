@@ -15,7 +15,7 @@ irstream::irstream(char const* pattern, size_t psize, searchablebuf *sb)
 	pattern_(new char[psize+1]), psize_(psize)
 {
 	init(dynamic_cast<std::streambuf*>(sb));
-	peek();
+	// peek();
 	memcpy(pattern_, pattern, psize);
 	state_ = INITED;
 }
@@ -58,8 +58,8 @@ irstream::rdbuf(searchablebuf *sb)
 	searchablebuf *tmp( dynamic_cast<searchablebuf*>(std::istream::rdbuf(cast)) );
 	// touch
 	// if(0 == dynamic_cast<__gnu_cxx::stdio_filebuf<char>*>(sb))
-	cast->sgetc();
-	//peek();
+	// cast->sgetc();
+	// peek();
 	state_ = INITED;
 	return tmp;
 }
@@ -73,7 +73,9 @@ irstream::getrecord(char* output, size_t size)
 		return *this;
 
 	std::streambuf* stdbuf(dynamic_cast<std::streambuf*>(rdbuf()));
-	
+	// touch
+	stdbuf->sgetc();
+
 	// preserve null terminator character
 	size -= 1;
 
@@ -159,7 +161,9 @@ irstream::getrecord(char const** beg)
 		return 0;
 
 	std::streambuf* stdbuf(dynamic_cast<std::streambuf*>(rdbuf()));
-	
+	// touch
+	stdbuf->sgetc();
+
 	char const* end(0);
 	
 	Dispatch:

@@ -185,7 +185,7 @@ public:
 	research()
 	{ 
 		state_ = INITED; std::istream::clear(); rdbuf()->restart(); 
-		peek();
+		//peek();
 	}
 private:
 	/** Prevent copy and assignment to this class
