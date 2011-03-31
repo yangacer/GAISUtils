@@ -108,6 +108,38 @@ private:
 	bool found;
 };
 
+class basic_rio
+{
+public:
+	basic_rio();
+	basic_rio(char const *begin_pat, size_t psize);
+	~basic_rio();
+
+	/** 
+	 * @return Pattern size.
+	 */
+	size_t psize() const;
+	
+	/** 
+	 * @return C-string pattern.
+	 */
+	char const * 
+	begin_pattern () const;
+	
+	/** 
+	 * @param pattern const C-string pattern.
+	 * @param size Size of pattern parameter.
+	 */
+	void 
+	begin_pattern ( char const* pattern, size_t psize );
+private:
+	basic_rio(basic_rio const &cp);
+	basic_rio& operator=(basic_rio const &cp);
+
+	char *pattern_;
+	size_t psize_;
+};
+
 /** Input record stream
  */
 class irstream : public std::istream

@@ -3,6 +3,42 @@
 
 size_t const searchablebuf::npos((size_t)-1);
 
+//------------ basic rio class impl ------------------
+basic_rio::basic_rio()
+: pattern_(0), psize_(0)
+{}
+
+
+basic_rio::basic_rio(char const *begin_pat, size_t psize)
+: pattern_(0), psize_(0)
+{
+	begin_pattern(begin_pat, psize);
+}
+
+basic_rio::~basic_rio()
+{ delete []pattern_; }
+
+size_t 
+basic_rio::psize() const 
+{ return psize_; }
+
+char const * 
+basic_rio::begin_pattern () const 
+{ return pattern_; }
+
+void 
+basic_rio::begin_pattern ( char const* pattern, size_t psize )
+{
+	if(psize > psize_ || !psize_ ){
+		delete [] pattern_;
+		pattern_ = new char[psize+1];
+		assert(pattern_ != 0);
+		psize_ = psize;
+	}
+	memcpy(pattern_, pattern, psize);
+	pattern_[psize] = 0;
+}
+
 //------------ irstream class implementation -----------------------
 
 irstream::irstream() 
@@ -24,10 +60,12 @@ irstream::~irstream()
 { delete [] pattern_; }
 
 size_t 
-irstream::psize() const { return psize_; }
+irstream::psize() const 
+{ return psize_; }
 
 char const * 
-irstream::begin_pattern () const { return pattern_; }
+irstream::begin_pattern () const 
+{ return pattern_; }
 
 void 
 irstream::begin_pattern ( char const* pattern, size_t psize )
