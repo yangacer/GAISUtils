@@ -128,7 +128,7 @@ irstream::getrecord(char* output, size_t size)
 			// Match preceding
 			while( !fail() && !eof() && !bad() ){
 
-				pos = rdbuf()->search(pattern_, psize_);
+				pos = rdbuf()->search(begin_pattern(), psize());
 
 				if( searchablebuf::npos == pos){
 					// Flush whole buffer and refill it
@@ -142,7 +142,7 @@ irstream::getrecord(char* output, size_t size)
 			}
 			break;
 		case PMATCH:
-			pos = rdbuf()->search(pattern_, psize_);
+			pos = rdbuf()->search(begin_pattern(), psize());
 			// Not found
 			if( searchablebuf::npos == pos ){
 				// output buffer available
@@ -208,7 +208,7 @@ irstream::getrecord(char const** beg)
 	switch(state_){
 		case INITED:
 			// Match preceeding
-			if( 0 == rdbuf()->search_nptr(pattern_, psize_) ){
+			if( 0 == rdbuf()->search_nptr(begin_pattern(), psize()) ){
 				setstate(ios_base::failbit);
 				*beg = 0;
 				return 0;
@@ -219,7 +219,7 @@ irstream::getrecord(char const** beg)
 			break;
 		case PMATCH:
 			*beg = rdbuf()->ptr_head();
-			end = rdbuf()->search_nptr(pattern_, psize_);
+			end = rdbuf()->search_nptr(begin_pattern(), psize());
 			if( end == 0 ){
 				setstate(ios_base::failbit);
 				return rdbuf()->buf_end() - *beg;			
