@@ -18,13 +18,6 @@ basic_rio::basic_rio(char const *begin_pat, size_t psize)
 basic_rio::~basic_rio()
 { delete []pattern_; }
 
-size_t 
-basic_rio::psize() const 
-{ return psize_; }
-
-char const * 
-basic_rio::begin_pattern () const 
-{ return pattern_; }
 
 void 
 basic_rio::begin_pattern ( char const* pattern, size_t psize )
@@ -42,43 +35,21 @@ basic_rio::begin_pattern ( char const* pattern, size_t psize )
 //------------ irstream class implementation -----------------------
 
 irstream::irstream() 
-:	std::istream(0), 
-	pattern_(0), psize_(0), state_(UNINITED) 
+:	std::istream(0), basic_rio(),
+	state_(UNINITED) 
 {}
 	
 irstream::irstream(char const* pattern, size_t psize, searchablebuf *sb) 
-: 	std::istream(dynamic_cast<std::streambuf*>(sb)),
-	pattern_(new char[psize+1]), psize_(psize)
+: 	basic_rio(pattern, psize),
+	std::istream(dynamic_cast<std::streambuf*>(sb))
 {
 	init(dynamic_cast<std::streambuf*>(sb));
-	// peek();
-	memcpy(pattern_, pattern, psize);
 	state_ = INITED;
 }
 
 irstream::~irstream()
-{ delete [] pattern_; }
+{}
 
-size_t 
-irstream::psize() const 
-{ return psize_; }
-
-char const * 
-irstream::begin_pattern () const 
-{ return pattern_; }
-
-void 
-irstream::begin_pattern ( char const* pattern, size_t psize )
-{
-	if(psize > psize_ || !psize_ ){
-		delete [] pattern_;
-		pattern_ = new char[psize+1];
-		assert(pattern_ != 0);
-		psize_ = psize;
-	}
-	memcpy(pattern_, pattern, psize);
-	pattern_[psize] = 0;
-}
 
 searchablebuf* 
 irstream::rdbuf() const 
@@ -94,14 +65,9 @@ irstream::rdbuf(searchablebuf *sb)
 	
 	std::streambuf *cast(dynamic_cast<std::streambuf*>(sb));
 	searchablebuf *tmp( dynamic_cast<searchablebuf*>(std::istream::rdbuf(cast)) );
-	// touch
-	// if(0 == dynamic_cast<__gnu_cxx::stdio_filebuf<char>*>(sb))
-	// cast->sgetc();
-	// peek();
 	state_ = INITED;
 	return tmp;
 }
-
 
 
 irstream & 
@@ -111,6 +77,7 @@ irstream::getrecord(char* output, size_t size)
 		return *this;
 
 	std::streambuf* stdbuf(dynamic_cast<std::streambuf*>(rdbuf()));
+	
 	// touch
 	stdbuf->sgetc();
 
@@ -135,7 +102,7 @@ irstream::getrecord(char* output, size_t size)
 					ignore(stdbuf->in_avail());
 					peek();
 				}else{
-					ignore(pos + psize_);
+					ignore(pos + psize());
 					state_ = PMATCH;
 					goto Dispatch;
 				}
@@ -182,7 +149,7 @@ irstream::getrecord(char* output, size_t size)
 				read(output + output_off, pos);
 				output[output_off + pos] = 0;
 				output_off += pos;
-				ignore(psize_);
+				ignore(psize());
 				state_ = PMATCH;
 				return *this;
 			}
@@ -231,8 +198,8 @@ irstream::getrecord(char const** beg)
 	}
 	return 0;
 }
-//----------- irfstream implementation -------------------
 
+//----------- irfstream implementation -------------------
 irfstream::irfstream() 
 : irstream(), fbuf_() 
 {

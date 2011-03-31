@@ -45,14 +45,6 @@ public:
 	: on_searching_(0), found(true)
 	{}
 	
-	/*
-	searchablebuf_tmpl(FILE* c_file)
-	: on_searching_(0), found(true), StreamBuf(c_file, std::ios::in, BUFSIZ)
-	{
-		if(c_file != stdin)
-			throw "searchablebuf can not be initiated by FILE* other than stdin";
-	}
-	*/
 
 	/** Generic pattern search implementation.
 	 * @param pattern Record begin pattern.
@@ -112,19 +104,24 @@ class basic_rio
 {
 public:
 	basic_rio();
+	
 	basic_rio(char const *begin_pat, size_t psize);
+	
 	~basic_rio();
 
 	/** 
 	 * @return Pattern size.
 	 */
-	size_t psize() const;
+	size_t 
+	psize() const
+	{ return psize_; }
 	
 	/** 
 	 * @return C-string pattern.
 	 */
 	char const * 
-	begin_pattern () const;
+	begin_pattern () const
+	{ return pattern_; }
 	
 	/** 
 	 * @param pattern const C-string pattern.
@@ -140,33 +137,16 @@ private:
 	size_t psize_;
 };
 
+
 /** Input record stream
  */
-class irstream : public std::istream
+class irstream : public std::istream, public basic_rio
 {
 public:
 	irstream();
 	irstream(char const* pattern, size_t psize, searchablebuf *sb);
 	~irstream();
 	
-	/** 
-	 * @return Pattern size.
-	 */
-	size_t psize() const;
-	
-	/** 
-	 * @return C-string pattern.
-	 */
-	char const * 
-	begin_pattern () const;
-	
-	/** 
-	 * @param pattern const C-string pattern.
-	 * @param size Size of pattern parameter.
-	 */
-	void 
-	begin_pattern ( char const* pattern, size_t psize );
-
 	/**
 	 * @return Constant searchable* point to buffer used by an instance.
 	 */
@@ -225,8 +205,6 @@ private:
 	irstream(irstream const & cp);
 	irstream & operator = (irstream const &cp);
 
-	char *pattern_;
-	size_t psize_;
 	enum STATE{ INITED, PMATCH, UNINITED };
 	STATE state_;
 	size_t output_off;
@@ -264,7 +242,6 @@ private:
 	irfstream(irfstream const & cp);
 	irstream & operator = (irfstream const &cp);
 	searchablebuf_tmpl<std::filebuf> fbuf_;
-	//searchablebuf_tmpl<__gnu_cxx::stdio_filebuf<char> > fbuf_;
 
 };
 
@@ -273,7 +250,7 @@ class irstringstream : public irstream
 public:
 	irstringstream();
 
-	/** Notice the strbuf_ is initialized with ios_base::in | ios_base::out
+	/** Notice the strbuf_ is initialized with ios::in | ios::out
 	 */
 	irstringstream(char const* pattern, size_t psize);
 	irstringstream(char const* pattern, size_t psize, 
