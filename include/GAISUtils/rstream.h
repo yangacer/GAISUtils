@@ -326,4 +326,32 @@ private:
 	std::filebuf fbuf_;
 };
 
+class orstringstream : public orstream 
+{
+public:
+	orstringstream();
+
+	/** Notice the strbuf_ is initialized with ios::in | ios::out
+	 */
+	orstringstream(char const* pattern, size_t psize);
+	orstringstream(char const* pattern, size_t psize, 
+		std::string const & s);
+	~orstringstream();
+
+	std::stringbuf*
+	rdbuf() const;
+
+	std::string
+	str() const;
+	
+	void
+	str(std::string & s);
+
+private:
+	orstringstream(orstringstream const &cp);
+	orstringstream& operator=(orstringstream const &cp);
+
+	std::stringbuf strbuf_;
+};
+
 #endif

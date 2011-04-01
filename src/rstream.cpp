@@ -315,8 +315,9 @@ orfstream::~orfstream() {}
 
 orfstream::orfstream(char const* pattern, size_t psize, 
 	char const *filename, std::ios_base::openmode mode)
-: orstream(pattern, psize), fbuf_()
+: orstream(), fbuf_()
 {
+	begin_pattern(pattern, psize);
 	init(dynamic_cast<std::streambuf*>(&fbuf_));
 	open(filename, mode);
 	orstream::rdbuf(&fbuf_);
@@ -352,6 +353,44 @@ orfstream::close()
 		setstate(ios_base::failbit);
 }
 
+//---------------- orstringstream implementation ----------------
+
+orstringstream::orstringstream() 
+: orstream(), strbuf_()
+{}
+
+orstringstream::orstringstream(char const* pattern, size_t psize)
+: orstream(), strbuf_()
+{
+	begin_pattern(pattern, psize);
+	init(&strbuf_);
+	orstream::rdbuf(rdbuf());
+}
+
+orstringstream::orstringstream(char const* pattern, size_t psize, 
+	std::string const & s)
+: orstream(), strbuf_()
+{
+	begin_pattern(pattern, psize);
+	init(&strbuf_);
+	orstream::rdbuf(rdbuf());
+	strbuf_.str(s);
+}
+
+orstringstream::~orstringstream()
+{}
+
+std::stringbuf*
+orstringstream::rdbuf() const
+{ return const_cast<std::stringbuf*>(&strbuf_); }
+
+std::string
+orstringstream::str() const
+{ return strbuf_.str(); }
+
+void
+orstringstream::str(std::string & s)
+{ strbuf_.str(s); }
 
 #ifdef TEST_RSTREAM
 //----------- test main() ------------------------
