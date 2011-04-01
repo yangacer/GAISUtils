@@ -1,3 +1,6 @@
+#ifndef _RSTREAM_H
+#define _RSTREAM_H
+
 #include <sstream>
 #include <fstream>
 #include <algorithm>
@@ -96,7 +99,7 @@ private:
 	 */
 	searchablebuf_tmpl(searchablebuf_tmpl const &cp);
 	searchablebuf_tmpl& operator = (searchablebuf_tmpl const & cp);
-	int on_searching_;
+	unsigned int on_searching_;
 	bool found;
 };
 
@@ -182,6 +185,14 @@ public:
 	irstream &
 	getrecord(char* output, size_t size);
 	
+	/** 
+	 * @param beg For placing found pointer points to record begin
+	 * @return Size of found record
+	 * @remark This method does NOT change any buffer states. When
+	 * searching fail, buffer margin reached, return value will be
+	 * the distance between buffer end pointer (eqptr()) and previous
+	 * record's end or buffer begin pointer (gptr()).
+	 */
 	size_t
 	getrecord(char const** beg);
 
@@ -198,8 +209,6 @@ public:
 	{ state_ = INITED; std::istream::clear(); rdbuf()->restart(); }
 
 private:
-	/** Prevent copy and assignment to this class
-	 */
 	irstream(irstream const & cp);
 	irstream & operator = (irstream const &cp);
 
@@ -316,3 +325,5 @@ private:
 	irstream & operator = (orfstream const &cp);
 	std::filebuf fbuf_;
 };
+
+#endif
