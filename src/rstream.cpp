@@ -298,8 +298,11 @@ orstream::orstream()
 : std::ostream(), basic_rio()
 {}
 
-orstream::orstream(char const *begin_pat, size_t psize)
-: std::ostream(), basic_rio(begin_pat, psize)
+orstream::orstream(char const *begin_pat, size_t psize, std::streambuf *sb)
+: std::ostream(sb), basic_rio(begin_pat, psize)
+{}
+
+orstream::~orstream()
 {}
 
 // --------------- orfstream impl --------------------
@@ -391,6 +394,29 @@ orstringstream::str() const
 void
 orstringstream::str(std::string & s)
 { strbuf_.str(s); }
+
+
+//------- rstream impl --------------
+
+rstream::rstream()
+:irstream(), orstream()
+{}
+
+rstream::rstream(char const *begin_pat, size_t psize, std::streambuf* sb)
+: irstream(begin_pat, psize, dynamic_cast<searchablebuf*>(sb)), 
+  orstream(begin_pat, psize, sb)
+{}
+
+rstream::~rstream()
+{}
+
+//---------- rfstream impl ---------------
+
+/*
+rfstream::rfstream()
+: rstream()
+{}
+*/
 
 #ifdef TEST_RSTREAM
 //----------- test main() ------------------------

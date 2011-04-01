@@ -110,7 +110,7 @@ public:
 	
 	basic_rio(char const *begin_pat, size_t psize);
 	
-	~basic_rio();
+	virtual ~basic_rio();
 
 	/** 
 	 * @return Pattern size.
@@ -148,7 +148,7 @@ class irstream : public std::istream, public basic_rio
 public:
 	irstream();
 	irstream(char const* pattern, size_t psize, searchablebuf *sb);
-	~irstream();
+	virtual ~irstream();
 	
 	/**
 	 * @return Constant searchable* point to buffer used by an instance.
@@ -221,7 +221,6 @@ class irfstream : public irstream
 {
 public:
 	irfstream();
-	
 	~irfstream();
 
 	irfstream(char const* pattern, size_t psize, 
@@ -240,7 +239,6 @@ public:
 
 	void 
 	open(char const* filename, std::ios_base::openmode mode = ios_base::in);
-	
 
 	void 
 	close();
@@ -286,7 +284,8 @@ class orstream : public std::ostream, public basic_rio
 {
 public:
 	orstream();
-	orstream(char const *begin_pat, size_t psize);
+	orstream(char const *begin_pat, size_t psize, std::streambuf* sb);
+	virtual ~orstream();
 private:
 	orstream(orstream const &cp);
 	orstream& operator=(orstream const &cp);
@@ -296,7 +295,6 @@ class orfstream : public orstream
 {
 public:
 	orfstream();
-	
 	~orfstream();
 
 	orfstream(char const* pattern, size_t psize, 
@@ -315,7 +313,6 @@ public:
 
 	void 
 	open(char const* filename, std::ios_base::openmode mode = ios_base::in);
-	
 
 	void 
 	close();
@@ -354,4 +351,41 @@ private:
 	std::stringbuf strbuf_;
 };
 
+// -------------- rstream --------------------
+
+class rstream : public irstream, public orstream
+{
+public:
+	rstream();
+	rstream(char const *begin_pat, size_t psize, std::streambuf* sb);
+	virtual ~rstream();
+private:
+	rstream(rstream const& cp);
+	rstream& operator=(rstream const& cp);
+};
+
+/*
+class rfstream : public rstream
+{
+public:
+	rfstream();
+	rfstream(char const *begin_pat, size_t psize);
+	~rfstream();
+private:
+	rfstream(rfstream const& cp);
+	rfstream& operator=(rfstream const& cp);
+	searchablebuf_tmpl<std::filebuf> fbuf_;
+};
+
+class rstringstream : public rstream
+{
+public:
+	rstringstream();
+	rstringstream(char const *begin_pat, size_t psize);
+	~rstringstream();
+private:
+	rstringstream(rstringstream const &cp);
+	rstringstream& operator=(rstringstream const &cp);
+};
+*/
 #endif
