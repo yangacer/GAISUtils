@@ -195,10 +195,8 @@ public:
 	
 	void
 	research()
-	{ 
-		state_ = INITED; std::istream::clear(); rdbuf()->restart(); 
-		//peek();
-	}
+	{ state_ = INITED; std::istream::clear(); rdbuf()->restart(); }
+
 private:
 	/** Prevent copy and assignment to this class
 	 */
@@ -240,7 +238,7 @@ public:
 
 private:
 	irfstream(irfstream const & cp);
-	irstream & operator = (irfstream const &cp);
+	irfstream & operator = (irfstream const &cp);
 	searchablebuf_tmpl<std::filebuf> fbuf_;
 
 };
@@ -273,4 +271,48 @@ private:
 	searchablebuf_tmpl<std::stringbuf> strbuf_;
 };
 
+// -------------- orstream decl -------------------
 
+class orstream : public std::ostream, public basic_rio
+{
+public:
+	orstream();
+	orstream(char const *begin_pat, size_t psize);
+private:
+	orstream(orstream const &cp);
+	orstream& operator=(orstream const &cp);
+};
+
+class orfstream : public orstream
+{
+public:
+	orfstream();
+	
+	~orfstream();
+
+	orfstream(char const* pattern, size_t psize, 
+		char const *filename, std::ios_base::openmode mode = ios_base::in);
+	
+	orfstream(char const* pattern, size_t psize, FILE* c_file);
+
+	std::filebuf*
+	rdbuf() const;
+
+	bool 
+	is_open();
+	
+	bool 
+	is_open() const;
+
+	void 
+	open(char const* filename, std::ios_base::openmode mode = ios_base::in);
+	
+
+	void 
+	close();
+
+private:
+	orfstream(orfstream const & cp);
+	irstream & operator = (orfstream const &cp);
+	std::filebuf fbuf_;
+};

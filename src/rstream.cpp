@@ -220,16 +220,6 @@ irfstream::irfstream(char const* pattern, size_t psize,
 }
 
 
-/*
-irfstream::irfstream(char const* pattern, size_t psize, FILE* c_file)
-: irstream(), fbuf_(c_file)
-{
-	begin_pattern(pattern, psize);
-	init(dynamic_cast<std::streambuf*>(&fbuf_));
-	//open(filename, mode);
-	irstream::rdbuf(&fbuf_);
-}
-*/
 
 searchablebuf_tmpl<std::filebuf> *
 irfstream::rdbuf() const
@@ -249,13 +239,10 @@ irfstream::open(char const* filename, std::ios_base::openmode mode)
 {
 	if(!fbuf_.open(filename, mode | ios_base::in))
 		setstate(ios_base::failbit);
-	else{
+	else
 		clear();
-		peek();
-	}
+	
 }
-
-
 
 void 
 irfstream::close()
@@ -303,6 +290,67 @@ irstringstream::str() const
 void
 irstringstream::str(std::string & s)
 { strbuf_.str(s); }
+
+
+// ---------------- orstream impl -------------------
+
+orstream::orstream()
+: std::ostream(), basic_rio()
+{}
+
+orstream::orstream(char const *begin_pat, size_t psize)
+: std::ostream(), basic_rio(begin_pat, psize)
+{}
+
+// --------------- orfstream impl --------------------
+
+orfstream::orfstream() 
+: orstream(), fbuf_() 
+{
+	init(dynamic_cast<std::streambuf*>(&fbuf_));
+	orstream::rdbuf(&fbuf_);
+}
+
+orfstream::~orfstream() {}
+
+orfstream::orfstream(char const* pattern, size_t psize, 
+	char const *filename, std::ios_base::openmode mode)
+: orstream(pattern, psize), fbuf_()
+{
+	init(dynamic_cast<std::streambuf*>(&fbuf_));
+	open(filename, mode);
+	orstream::rdbuf(&fbuf_);
+}
+
+std::filebuf *
+orfstream::rdbuf() const
+{ return const_cast<std::filebuf *>(&fbuf_); }
+
+
+bool 
+orfstream::is_open()
+{ return fbuf_.is_open(); }
+
+bool 
+orfstream::is_open() const
+{ return fbuf_.is_open(); }
+
+void 
+orfstream::open(char const* filename, std::ios_base::openmode mode)
+{
+	if(!fbuf_.open(filename, mode | ios_base::out))
+		setstate(ios_base::failbit);
+	else
+		clear();
+	
+}
+
+void 
+orfstream::close()
+{
+	if(!fbuf_.close())
+		setstate(ios_base::failbit);
+}
 
 
 #ifdef TEST_RSTREAM
