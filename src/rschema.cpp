@@ -70,4 +70,4 @@ rschema::make(record& r)
 
 unsigned int
 rschema::field_count() const
-{ return proto_->vals_.size(); }
+{ return proto_?proto_->vals_.size():0; }

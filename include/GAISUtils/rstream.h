@@ -132,6 +132,8 @@ public:
 	 */
 	void 
 	begin_pattern ( char const* pattern, size_t psize );
+	
+		
 private:
 	basic_rio(basic_rio const &cp);
 	basic_rio& operator=(basic_rio const &cp);
@@ -155,14 +157,14 @@ public:
 	 */
 	searchablebuf* 
 	rdbuf() const;
-	
+
 	/**
 	 * @param sb searchablebuf* that replaces the original one.
 	 * @return The original searchblebuf*
 	 */
 	searchablebuf* 
 	rdbuf(searchablebuf *sb);
-
+	
 	/**
 	 * @param output For placing fetched record.
 	 * @param size Size of output parameter.
@@ -205,8 +207,7 @@ public:
 	{ return output_off; }
 	
 	void
-	research()
-	{ state_ = INITED; std::istream::clear(); rdbuf()->restart(); }
+	research();
 
 private:
 	irstream(irstream const & cp);
@@ -284,8 +285,15 @@ class orstream : public std::ostream, public basic_rio
 {
 public:
 	orstream();
-	orstream(char const *begin_pat, size_t psize, std::streambuf* sb);
+	orstream(char const *begin_pat, size_t psize, searchablebuf* sb);
 	virtual ~orstream();
+
+	searchablebuf* 
+	rdbuf() const;
+	
+	searchablebuf*
+	rdbuf(searchablebuf* sb);
+
 private:
 	orstream(orstream const &cp);
 	orstream& operator=(orstream const &cp);
@@ -302,7 +310,7 @@ public:
 	
 	orfstream(char const* pattern, size_t psize, FILE* c_file);
 
-	std::filebuf*
+	searchablebuf_tmpl<std::filebuf>*
 	rdbuf() const;
 
 	bool 
@@ -320,7 +328,7 @@ public:
 private:
 	orfstream(orfstream const & cp);
 	irstream & operator = (orfstream const &cp);
-	std::filebuf fbuf_;
+	searchablebuf_tmpl<std::filebuf> fbuf_;
 };
 
 class orstringstream : public orstream 
@@ -335,7 +343,7 @@ public:
 		std::string const & s);
 	~orstringstream();
 
-	std::stringbuf*
+	searchablebuf_tmpl<std::stringbuf>*
 	rdbuf() const;
 
 	std::string
@@ -348,7 +356,7 @@ private:
 	orstringstream(orstringstream const &cp);
 	orstringstream& operator=(orstringstream const &cp);
 
-	std::stringbuf strbuf_;
+	searchablebuf_tmpl<std::stringbuf> strbuf_;
 };
 
 // -------------- rstream --------------------
@@ -357,7 +365,7 @@ class rstream : public irstream, public orstream
 {
 public:
 	rstream();
-	rstream(char const *begin_pat, size_t psize, std::streambuf* sb);
+	rstream(char const *begin_pat, size_t psize, searchablebuf* sb);
 	virtual ~rstream();
 private:
 	rstream(rstream const& cp);

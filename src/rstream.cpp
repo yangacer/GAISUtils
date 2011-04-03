@@ -32,6 +32,9 @@ basic_rio::begin_pattern ( char const* pattern, size_t psize )
 	pattern_[psize] = 0;
 }
 
+
+
+
 //------------ irstream class implementation -----------------------
 
 irstream::irstream() 
@@ -49,7 +52,6 @@ irstream::irstream(char const* pattern, size_t psize, searchablebuf *sb)
 
 irstream::~irstream()
 {}
-
 
 searchablebuf* 
 irstream::rdbuf() const 
@@ -69,6 +71,9 @@ irstream::rdbuf(searchablebuf *sb)
 	return tmp;
 }
 
+void
+irstream::research()
+{ state_ = INITED; std::istream::clear(); rdbuf()->restart(); }
 
 irstream & 
 irstream::getrecord(char* output, size_t size)
@@ -298,13 +303,28 @@ orstream::orstream()
 : std::ostream(), basic_rio()
 {}
 
-orstream::orstream(char const *begin_pat, size_t psize, std::streambuf *sb)
-: std::ostream(sb), basic_rio(begin_pat, psize)
+orstream::orstream(char const *begin_pat, size_t psize, searchablebuf *sb)
+: std::ostream(dynamic_cast<std::streambuf*>(sb)), 
+  basic_rio(begin_pat, psize)
 {}
 
 orstream::~orstream()
 {}
 
+searchablebuf* 
+orstream::rdbuf() const 
+{
+	return dynamic_cast<searchablebuf*>(std::ostream::rdbuf());
+}
+
+searchablebuf* 
+orstream::rdbuf(searchablebuf *sb)
+{
+	
+	std::streambuf *cast(dynamic_cast<std::streambuf*>(sb));
+	searchablebuf *tmp( dynamic_cast<searchablebuf*>(std::ostream::rdbuf(cast)) );
+	return tmp;
+}
 // --------------- orfstream impl --------------------
 
 orfstream::orfstream() 
@@ -326,9 +346,9 @@ orfstream::orfstream(char const* pattern, size_t psize,
 	orstream::rdbuf(&fbuf_);
 }
 
-std::filebuf *
+searchablebuf_tmpl<std::filebuf> *
 orfstream::rdbuf() const
-{ return const_cast<std::filebuf *>(&fbuf_); }
+{ return const_cast<searchablebuf_tmpl<std::filebuf>*>(&fbuf_); }
 
 
 bool 
@@ -383,9 +403,9 @@ orstringstream::orstringstream(char const* pattern, size_t psize,
 orstringstream::~orstringstream()
 {}
 
-std::stringbuf*
+searchablebuf_tmpl<std::stringbuf>*
 orstringstream::rdbuf() const
-{ return const_cast<std::stringbuf*>(&strbuf_); }
+{ return const_cast<searchablebuf_tmpl<std::stringbuf>*>(&strbuf_); }
 
 std::string
 orstringstream::str() const
@@ -402,8 +422,8 @@ rstream::rstream()
 :irstream(), orstream()
 {}
 
-rstream::rstream(char const *begin_pat, size_t psize, std::streambuf* sb)
-: irstream(begin_pat, psize, dynamic_cast<searchablebuf*>(sb)), 
+rstream::rstream(char const *begin_pat, size_t psize, searchablebuf* sb)
+: irstream(begin_pat, psize, sb), 
   orstream(begin_pat, psize, sb)
 {}
 
