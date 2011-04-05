@@ -12,6 +12,7 @@
 #include "small_vector.h"
 #include "rschema.h"
 
+#include <cstring>
 #include <sstream>
 #include <functional>
 #include <string>
@@ -141,17 +142,20 @@ public:
 	record(record const &cp)
 	: schema_(cp.schema_)
 	{
-		StorageType::iterator iter(cp.vals_.begin());
-		while(iter != cp.vals_.end()){
-			vals_.push_back((*iter)->Clone());
-			++iter;
+		if(this != &cp){
+			StorageType::iterator iter(cp.vals_.begin());
+			while(iter != cp.vals_.end()){
+				vals_.push_back((*iter)->Clone());
+				++iter;
+			}
 		}
 	}
 	
 	record& 
 	operator=(record const &cp)
 	{
-
+		if(this == &cp)
+			return *this;
 		StorageType::iterator iter(vals_.begin());
 		while(iter != vals_.end()){
 			delete (*iter);
@@ -375,6 +379,8 @@ inline std::pair<size_t, size_t> find_field(
 	char const *end_pattern = "\n", 
 	size_t hint_offset = 0)
 {
+	using std::strlen;
+
 	std::pair<size_t, size_t> rt((size_t)-1, 0);
 	char const *bp_end(begin_pattern + strlen(begin_pattern));
 	char const *txt_end(text + tsize);
