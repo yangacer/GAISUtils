@@ -145,26 +145,26 @@ private:
 
 /** Input record stream
  */
-class irstream : public std::istream, public basic_rio
+class irstream : public std::istream, virtual public basic_rio
 {
 public:
 	irstream();
-	irstream(char const* pattern, size_t psize, searchablebuf *sb);
+	irstream(char const* pattern, size_t psize, std::streambuf *sb);
 	virtual ~irstream();
 	
-	/**
+	/*
 	 * @return Constant searchable* point to buffer used by an instance.
-	 */
 	searchablebuf* 
 	rdbuf() const;
+	*/
 
 	/**
 	 * @param sb searchablebuf* that replaces the original one.
 	 * @return The original searchblebuf*
-	 */
 	searchablebuf* 
 	rdbuf(searchablebuf *sb);
-	
+	*/
+
 	/**
 	 * @param output For placing fetched record.
 	 * @param size Size of output parameter.
@@ -281,18 +281,20 @@ private:
 
 // -------------- orstream decl -------------------
 
-class orstream : public std::ostream, public basic_rio
+class orstream : public std::ostream, virtual public basic_rio
 {
 public:
 	orstream();
-	orstream(char const *begin_pat, size_t psize, searchablebuf* sb);
+	orstream(char const *begin_pat, size_t psize, std::streambuf* sb);
 	virtual ~orstream();
-
+	
+	/*
 	searchablebuf* 
 	rdbuf() const;
 	
 	searchablebuf*
 	rdbuf(searchablebuf* sb);
+	*/
 
 private:
 	orstream(orstream const &cp);
@@ -365,26 +367,57 @@ class rstream : public irstream, public orstream
 {
 public:
 	rstream();
-	rstream(char const *begin_pat, size_t psize, searchablebuf* sb);
+	rstream(char const *begin_pat, size_t psize, std::streambuf* sb);
 	virtual ~rstream();
+	/*
+	searchablebuf* 
+	rdbuf() const;
+	
+	searchablebuf*
+	rdbuf(searchablebuf* sb);
+	*/
 private:
 	rstream(rstream const& cp);
 	rstream& operator=(rstream const& cp);
 };
 
-/*
+
 class rfstream : public rstream
 {
 public:
 	rfstream();
 	rfstream(char const *begin_pat, size_t psize);
 	~rfstream();
+	
+	rfstream(char const* pattern, size_t psize, 
+		char const *filename, 
+		std::ios_base::openmode mode = ios_base::in | ios_base::out);
+	
+	rfstream(char const* pattern, size_t psize, FILE* c_file);
+
+	searchablebuf_tmpl<std::filebuf>*
+	rdbuf() const;
+
+	bool 
+	is_open();
+	
+	bool 
+	is_open() const;
+
+	void 
+	open(char const* filename, 
+		std::ios_base::openmode mode = ios_base::in | ios_base::out);
+
+	void 
+	close();
+
 private:
 	rfstream(rfstream const& cp);
 	rfstream& operator=(rfstream const& cp);
 	searchablebuf_tmpl<std::filebuf> fbuf_;
 };
 
+/*
 class rstringstream : public rstream
 {
 public:

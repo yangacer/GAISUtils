@@ -22,6 +22,8 @@ basic_rio::~basic_rio()
 void 
 basic_rio::begin_pattern ( char const* pattern, size_t psize )
 {
+	if(!pattern || !psize)
+		return;
 	if(psize > psize_ || !psize_ ){
 		delete [] pattern_;
 		pattern_ = new char[psize+1];
@@ -42,7 +44,7 @@ irstream::irstream()
 	state_(UNINITED) 
 {}
 	
-irstream::irstream(char const* pattern, size_t psize, searchablebuf *sb) 
+irstream::irstream(char const* pattern, size_t psize, std::streambuf *sb) 
 : 	basic_rio(pattern, psize),
 	std::istream(dynamic_cast<std::streambuf*>(sb))
 {
@@ -53,6 +55,7 @@ irstream::irstream(char const* pattern, size_t psize, searchablebuf *sb)
 irstream::~irstream()
 {}
 
+/*
 searchablebuf* 
 irstream::rdbuf() const 
 {
@@ -70,10 +73,15 @@ irstream::rdbuf(searchablebuf *sb)
 	state_ = INITED;
 	return tmp;
 }
+*/
 
 void
 irstream::research()
-{ state_ = INITED; std::istream::clear(); rdbuf()->restart(); }
+{ 
+	state_ = INITED; 
+	std::istream::clear(); 
+	dynamic_cast<searchablebuf*>(rdbuf())->restart(); 
+}
 
 irstream & 
 irstream::getrecord(char* output, size_t size)
@@ -81,10 +89,11 @@ irstream::getrecord(char* output, size_t size)
 	if(fail() || eof() || bad() || size == 0)
 		return *this;
 
-	std::streambuf* stdbuf(dynamic_cast<std::streambuf*>(rdbuf()));
-	
+	// std::streambuf* stdbuf(dynamic_cast<std::streambuf*>(rdbuf()));
+	searchablebuf* mybuf(dynamic_cast<searchablebuf*>(rdbuf()));
+	assert(mybuf != 0);
 	// touch
-	stdbuf->sgetc();
+	rdbuf()->sgetc();
 
 	// preserve null terminator character
 	size -= 1;
@@ -100,11 +109,11 @@ irstream::getrecord(char* output, size_t size)
 			// Match preceding
 			while( !fail() && !eof() && !bad() ){
 
-				pos = rdbuf()->search(begin_pattern(), psize());
+				pos = mybuf->search(begin_pattern(), psize());
 
 				if( searchablebuf::npos == pos){
 					// Flush whole buffer and refill it
-					ignore(stdbuf->in_avail());
+					ignore(rdbuf()->in_avail());
 					peek();
 				}else{
 					ignore(pos + psize());
@@ -114,12 +123,12 @@ irstream::getrecord(char* output, size_t size)
 			}
 			break;
 		case PMATCH:
-			pos = rdbuf()->search(begin_pattern(), psize());
+			pos = mybuf->search(begin_pattern(), psize());
 			// Not found
 			if( searchablebuf::npos == pos ){
 				// output buffer available
 				if(output_off < size){
-					min = std::min(size - output_off, (size_t)stdbuf->in_avail());
+					min = std::min(size - output_off, (size_t)rdbuf()->in_avail());
 					read(output + output_off, min);
 					output_off += min;
 					peek();
@@ -132,7 +141,7 @@ irstream::getrecord(char* output, size_t size)
 				// output buffer overflow (fail)
 				else {
 					output_off = 0;
-					ignore(stdbuf->in_avail());
+					ignore(rdbuf()->in_avail());
 					peek();
 					state_ = PMATCH;
 					setstate(ios_base::failbit);
@@ -170,9 +179,12 @@ irstream::getrecord(char const** beg)
 	if(fail() || eof() || bad())
 		return 0;
 
-	std::streambuf* stdbuf(dynamic_cast<std::streambuf*>(rdbuf()));
+	// std::streambuf* stdbuf(dynamic_cast<std::streambuf*>(rdbuf()));
+	searchablebuf* mybuf(dynamic_cast<searchablebuf*>(rdbuf()));
+	assert(mybuf != 0);
+
 	// touch
-	stdbuf->sgetc();
+	rdbuf()->sgetc();
 
 	char const* end(0);
 	
@@ -180,7 +192,7 @@ irstream::getrecord(char const** beg)
 	switch(state_){
 		case INITED:
 			// Match preceeding
-			if( 0 == rdbuf()->search_nptr(begin_pattern(), psize()) ){
+			if( 0 == mybuf->search_nptr(begin_pattern(), psize()) ){
 				setstate(ios_base::failbit);
 				*beg = 0;
 				return 0;
@@ -190,11 +202,11 @@ irstream::getrecord(char const** beg)
 			}
 			break;
 		case PMATCH:
-			*beg = rdbuf()->ptr_head();
-			end = rdbuf()->search_nptr(begin_pattern(), psize());
+			*beg = mybuf->ptr_head();
+			end = mybuf->search_nptr(begin_pattern(), psize());
 			if( end == 0 ){
 				setstate(ios_base::failbit);
-				return rdbuf()->buf_end() - *beg;			
+				return mybuf->buf_end() - *beg;			
 			}
 			output_off = end - *beg;
 			return end - *beg;
@@ -303,7 +315,7 @@ orstream::orstream()
 : std::ostream(), basic_rio()
 {}
 
-orstream::orstream(char const *begin_pat, size_t psize, searchablebuf *sb)
+orstream::orstream(char const *begin_pat, size_t psize, std::streambuf *sb)
 : std::ostream(dynamic_cast<std::streambuf*>(sb)), 
   basic_rio(begin_pat, psize)
 {}
@@ -311,6 +323,7 @@ orstream::orstream(char const *begin_pat, size_t psize, searchablebuf *sb)
 orstream::~orstream()
 {}
 
+/*
 searchablebuf* 
 orstream::rdbuf() const 
 {
@@ -325,6 +338,7 @@ orstream::rdbuf(searchablebuf *sb)
 	searchablebuf *tmp( dynamic_cast<searchablebuf*>(std::ostream::rdbuf(cast)) );
 	return tmp;
 }
+*/
 // --------------- orfstream impl --------------------
 
 orfstream::orfstream() 
@@ -419,10 +433,10 @@ orstringstream::str(std::string & s)
 //------- rstream impl --------------
 
 rstream::rstream()
-:irstream(), orstream()
+:irstream(), orstream(0, 0, irstream::rdbuf())
 {}
 
-rstream::rstream(char const *begin_pat, size_t psize, searchablebuf* sb)
+rstream::rstream(char const *begin_pat, size_t psize, std::streambuf* sb)
 : irstream(begin_pat, psize, sb), 
   orstream(begin_pat, psize, sb)
 {}
@@ -430,13 +444,72 @@ rstream::rstream(char const *begin_pat, size_t psize, searchablebuf* sb)
 rstream::~rstream()
 {}
 
+/*
+searchablebuf* 
+rstream::rdbuf() const
+{	return 	const_cast<searchablebuf*>(irstream::rdbuf()); }
+
+searchablebuf*
+rstream::rdbuf(searchablebuf* sb)
+{ 
+	irstream::rdbuf(sb);
+	return orstream::rdbuf(sb);
+}
+*/
+
 //---------- rfstream impl ---------------
 
-/*
-rfstream::rfstream()
-: rstream()
-{}
-*/
+rfstream::rfstream() 
+: rstream(), fbuf_() 
+{
+	init(dynamic_cast<std::streambuf*>(&fbuf_));
+	rstream::rdbuf(&fbuf_);
+}
+
+rfstream::~rfstream() {}
+
+rfstream::rfstream(char const* pattern, size_t psize, 
+	char const *filename, std::ios_base::openmode mode)
+: rstream(), fbuf_()
+{
+	begin_pattern(pattern, psize);
+	init(dynamic_cast<std::streambuf*>(&fbuf_));
+	open(filename, mode);
+	rstream::rdbuf(&fbuf_);
+}
+
+
+
+searchablebuf_tmpl<std::filebuf> *
+rfstream::rdbuf() const
+{ return const_cast<searchablebuf_tmpl<std::filebuf> *>(&fbuf_); }
+
+
+bool 
+rfstream::is_open()
+{ return fbuf_.is_open(); }
+
+bool 
+rfstream::is_open() const
+{ return fbuf_.is_open(); }
+
+void 
+rfstream::open(char const* filename, std::ios_base::openmode mode)
+{
+	if(!fbuf_.open(filename, mode | ios_base::in | ios_base::out))
+		setstate(ios_base::failbit);
+	else
+		clear();
+	
+}
+
+void 
+rfstream::close()
+{
+	irstream::research();
+	if(!fbuf_.close())
+		setstate(ios_base::failbit);
+}
 
 #ifdef TEST_RSTREAM
 //----------- test main() ------------------------
