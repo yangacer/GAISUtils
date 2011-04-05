@@ -55,25 +55,6 @@ irstream::irstream(char const* pattern, size_t psize, std::streambuf *sb)
 irstream::~irstream()
 {}
 
-/*
-searchablebuf* 
-irstream::rdbuf() const 
-{
-	searchablebuf* tmp(dynamic_cast<searchablebuf*>(std::istream::rdbuf()));
-	assert(tmp != 0);
-	return tmp;
-}
-
-searchablebuf* 
-irstream::rdbuf(searchablebuf *sb)
-{
-	
-	std::streambuf *cast(dynamic_cast<std::streambuf*>(sb));
-	searchablebuf *tmp( dynamic_cast<searchablebuf*>(std::istream::rdbuf(cast)) );
-	state_ = INITED;
-	return tmp;
-}
-*/
 
 void
 irstream::research()
@@ -323,22 +304,6 @@ orstream::orstream(char const *begin_pat, size_t psize, std::streambuf *sb)
 orstream::~orstream()
 {}
 
-/*
-searchablebuf* 
-orstream::rdbuf() const 
-{
-	return dynamic_cast<searchablebuf*>(std::ostream::rdbuf());
-}
-
-searchablebuf* 
-orstream::rdbuf(searchablebuf *sb)
-{
-	
-	std::streambuf *cast(dynamic_cast<std::streambuf*>(sb));
-	searchablebuf *tmp( dynamic_cast<searchablebuf*>(std::ostream::rdbuf(cast)) );
-	return tmp;
-}
-*/
 // --------------- orfstream impl --------------------
 
 orfstream::orfstream() 
@@ -444,19 +409,6 @@ rstream::rstream(char const *begin_pat, size_t psize, std::streambuf* sb)
 rstream::~rstream()
 {}
 
-/*
-searchablebuf* 
-rstream::rdbuf() const
-{	return 	const_cast<searchablebuf*>(irstream::rdbuf()); }
-
-searchablebuf*
-rstream::rdbuf(searchablebuf* sb)
-{ 
-	irstream::rdbuf(sb);
-	return orstream::rdbuf(sb);
-}
-*/
-
 //---------- rfstream impl ---------------
 
 rfstream::rfstream() 
@@ -500,7 +452,6 @@ rfstream::open(char const* filename, std::ios_base::openmode mode)
 		setstate(ios_base::failbit);
 	else
 		clear();
-	
 }
 
 void 
@@ -510,6 +461,45 @@ rfstream::close()
 	if(!fbuf_.close())
 		setstate(ios_base::failbit);
 }
+
+//---------------- rstringstream implementation ----------------
+
+rstringstream::rstringstream() 
+: rstream(), strbuf_()
+{}
+
+rstringstream::rstringstream(char const* pattern, size_t psize)
+: rstream(), strbuf_()
+{
+	begin_pattern(pattern, psize);
+	init(&strbuf_);
+	rstream::rdbuf(rdbuf());
+}
+
+rstringstream::rstringstream(char const* pattern, size_t psize, 
+	std::string const & s)
+: rstream(), strbuf_()
+{
+	begin_pattern(pattern, psize);
+	init(&strbuf_);
+	rstream::rdbuf(rdbuf());
+	strbuf_.str(s);
+}
+
+rstringstream::~rstringstream()
+{}
+
+searchablebuf_tmpl<std::stringbuf>*
+rstringstream::rdbuf() const
+{ return const_cast<searchablebuf_tmpl<std::stringbuf>*>(&strbuf_); }
+
+std::string
+rstringstream::str() const
+{ return strbuf_.str(); }
+
+void
+rstringstream::str(std::string & s)
+{ strbuf_.str(s); }
 
 #ifdef TEST_RSTREAM
 //----------- test main() ------------------------

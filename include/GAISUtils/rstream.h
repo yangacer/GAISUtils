@@ -48,7 +48,6 @@ public:
 	: on_searching_(0), found(true)
 	{}
 	
-
 	/** Generic pattern search implementation.
 	 * @param pattern Record begin pattern.
 	 * @param psize Size of record begin pattern.
@@ -152,19 +151,6 @@ public:
 	irstream(char const* pattern, size_t psize, std::streambuf *sb);
 	virtual ~irstream();
 	
-	/*
-	 * @return Constant searchable* point to buffer used by an instance.
-	searchablebuf* 
-	rdbuf() const;
-	*/
-
-	/**
-	 * @param sb searchablebuf* that replaces the original one.
-	 * @return The original searchblebuf*
-	searchablebuf* 
-	rdbuf(searchablebuf *sb);
-	*/
-
 	/**
 	 * @param output For placing fetched record.
 	 * @param size Size of output parameter.
@@ -288,14 +274,6 @@ public:
 	orstream(char const *begin_pat, size_t psize, std::streambuf* sb);
 	virtual ~orstream();
 	
-	/*
-	searchablebuf* 
-	rdbuf() const;
-	
-	searchablebuf*
-	rdbuf(searchablebuf* sb);
-	*/
-
 private:
 	orstream(orstream const &cp);
 	orstream& operator=(orstream const &cp);
@@ -369,13 +347,6 @@ public:
 	rstream();
 	rstream(char const *begin_pat, size_t psize, std::streambuf* sb);
 	virtual ~rstream();
-	/*
-	searchablebuf* 
-	rdbuf() const;
-	
-	searchablebuf*
-	rdbuf(searchablebuf* sb);
-	*/
 private:
 	rstream(rstream const& cp);
 	rstream& operator=(rstream const& cp);
@@ -417,16 +388,31 @@ private:
 	searchablebuf_tmpl<std::filebuf> fbuf_;
 };
 
-/*
-class rstringstream : public rstream
+class rstringstream : public rstream 
 {
 public:
 	rstringstream();
-	rstringstream(char const *begin_pat, size_t psize);
+
+	/** Notice the strbuf_ is initialized with ios::in | ios::out
+	 */
+	rstringstream(char const* pattern, size_t psize);
+	rstringstream(char const* pattern, size_t psize, 
+		std::string const & s);
 	~rstringstream();
+
+	searchablebuf_tmpl<std::stringbuf>*
+	rdbuf() const;
+
+	std::string
+	str() const;
+	
+	void
+	str(std::string & s);
+
 private:
 	rstringstream(rstringstream const &cp);
 	rstringstream& operator=(rstringstream const &cp);
+
+	searchablebuf_tmpl<std::stringbuf> strbuf_;
 };
-*/
 #endif
