@@ -170,7 +170,8 @@ public:
 			*/
 			vals_.push_back((*iter)->Clone());
 			++iter;
-		}	
+		}
+		return *this;
 	}
 	
 	~record()
