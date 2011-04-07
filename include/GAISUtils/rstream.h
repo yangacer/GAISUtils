@@ -296,9 +296,10 @@ public:
 	orfstream(char const* pattern, size_t psize, 
 		char const *filename, std::ios_base::openmode mode = ios_base::in);
 	
-	orfstream(char const* pattern, size_t psize, FILE* c_file);
+	orfstream(char const* pattern, size_t psize, 
+		FILE* c_file, std::ios_base::openmode mode, size_t bsize);
 
-	searchablebuf_tmpl<std::filebuf>*
+	std::filebuf*
 	rdbuf() const;
 
 	bool 
@@ -316,7 +317,7 @@ public:
 private:
 	orfstream(orfstream const & cp);
 	irstream & operator = (orfstream const &cp);
-	searchablebuf_tmpl<std::filebuf> fbuf_;
+	std::streambuf* fbuf_;
 };
 
 class orstringstream : public orstream 

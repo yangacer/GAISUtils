@@ -317,41 +317,53 @@ orstream::~orstream()
 // --------------- orfstream impl --------------------
 
 orfstream::orfstream() 
-: orstream(), fbuf_() 
+: orstream(), fbuf_(new searchablebuf_tmpl<std::filebuf>()) 
 {
-	init(dynamic_cast<std::streambuf*>(&fbuf_));
-	orstream::rdbuf(&fbuf_);
+	init(fbuf_);
+	orstream::rdbuf(fbuf_);
 }
 
 orfstream::~orfstream() {}
 
 orfstream::orfstream(char const* pattern, size_t psize, 
 	char const *filename, std::ios_base::openmode mode)
-: orstream(), fbuf_()
+: orstream(), 
+  fbuf_(new searchablebuf_tmpl<std::filebuf>())
 {
 	begin_pattern(pattern, psize);
-	init(dynamic_cast<std::streambuf*>(&fbuf_));
+	init(fbuf_);
 	open(filename, mode);
-	orstream::rdbuf(&fbuf_);
+	orstream::rdbuf(fbuf_);
 }
 
-searchablebuf_tmpl<std::filebuf> *
+orfstream::orfstream(char const* pattern, size_t psize, 
+	FILE* c_file, std::ios_base::openmode mode, size_t bsize)
+: orstream(), 
+  fbuf_(new searchablebuf_tmpl<__gnu_cxx::stdio_filebuf<char> >(c_file, mode, bsize))
+{
+	begin_pattern(pattern, psize);
+	init(fbuf_);
+	orstream::rdbuf(fbuf_);
+}
+
+
+std::filebuf*
 orfstream::rdbuf() const
-{ return const_cast<searchablebuf_tmpl<std::filebuf>*>(&fbuf_); }
+{ return const_cast<std::filebuf*>(dynamic_cast<std::filebuf*>(fbuf_)); }
 
 
 bool 
 orfstream::is_open()
-{ return fbuf_.is_open(); }
+{ return rdbuf()->is_open(); }
 
 bool 
 orfstream::is_open() const
-{ return fbuf_.is_open(); }
+{ return rdbuf()->is_open(); }
 
 void 
 orfstream::open(char const* filename, std::ios_base::openmode mode)
 {
-	if(!fbuf_.open(filename, mode | ios_base::out))
+	if(!rdbuf()->open(filename, mode | ios_base::out))
 		setstate(ios_base::failbit);
 	else
 		clear();
@@ -361,7 +373,7 @@ orfstream::open(char const* filename, std::ios_base::openmode mode)
 void 
 orfstream::close()
 {
-	if(!fbuf_.close())
+	if(!rdbuf()->close())
 		setstate(ios_base::failbit);
 }
 
