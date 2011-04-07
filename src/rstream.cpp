@@ -199,43 +199,53 @@ irstream::getrecord(char const** beg)
 
 //----------- irfstream implementation -------------------
 irfstream::irfstream() 
-: irstream(), fbuf_() 
+: irstream(), fbuf_(new searchablebuf_tmpl<std::filebuf>()) 
 {
-	init(dynamic_cast<std::streambuf*>(&fbuf_));
-	irstream::rdbuf(&fbuf_);
+	init(fbuf_);
+	irstream::rdbuf(fbuf_);
 }
 
 irfstream::~irfstream() {}
 
 irfstream::irfstream(char const* pattern, size_t psize, 
 	char const *filename, std::ios_base::openmode mode)
-: irstream(), fbuf_()
+: irstream(), 
+  fbuf_(new searchablebuf_tmpl<std::filebuf>())
 {
 	begin_pattern(pattern, psize);
-	init(dynamic_cast<std::streambuf*>(&fbuf_));
+	init(fbuf_);
 	open(filename, mode);
-	irstream::rdbuf(&fbuf_);
+	irstream::rdbuf(fbuf_);
+}
+
+irfstream::irfstream(char const* pattern, size_t psize, 
+	FILE* c_file, std::ios_base::openmode mode, size_t bsize)
+: irstream(), 
+  fbuf_(new searchablebuf_tmpl<__gnu_cxx::stdio_filebuf<char> >(c_file, mode, bsize))
+{
+	begin_pattern(pattern, psize);
+	init(fbuf_);
+	irstream::rdbuf(fbuf_);
 }
 
 
-
-searchablebuf_tmpl<std::filebuf> *
+std::filebuf*
 irfstream::rdbuf() const
-{ return const_cast<searchablebuf_tmpl<std::filebuf> *>(&fbuf_); }
+{ return const_cast<std::filebuf*>(dynamic_cast<std::filebuf*>(fbuf_)); }
 
 
 bool 
 irfstream::is_open()
-{ return fbuf_.is_open(); }
+{ return rdbuf()->is_open(); }
 
 bool 
 irfstream::is_open() const
-{ return fbuf_.is_open(); }
+{ return rdbuf()->is_open(); }
 
 void 
 irfstream::open(char const* filename, std::ios_base::openmode mode)
 {
-	if(!fbuf_.open(filename, mode | ios_base::in))
+	if(!rdbuf()->open(filename, mode | ios_base::in))
 		setstate(ios_base::failbit);
 	else
 		clear();
@@ -246,7 +256,7 @@ void
 irfstream::close()
 {
 	research();
-	if(!fbuf_.close())
+	if(!rdbuf()->close())
 		setstate(ios_base::failbit);
 }
 
