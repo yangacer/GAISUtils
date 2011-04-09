@@ -38,7 +38,7 @@ struct create_field;
 template<typename T>
 class field : public absField, public Loki::SmallObject<>
 {
-private: // Client never creates field object directly
+private: // Client (out of GAISUtils lib) never creates field object directly
 	friend class record;
 	template<class T1> friend struct create_field;
 
@@ -69,7 +69,6 @@ private: // Client never creates field object directly
 
 		if(0 == p)
 			return -2;
-			//throw "Compare between different type";
 		if(val_ < p->val_)
 			return -1;
 		if(val_ > p->val_)
@@ -128,9 +127,6 @@ class record
 	friend void fromGAISRecord(record& r, char const* raw, unsigned int rsize);
 	friend std::ostream& toGAISRecord(record const& r, std::ostream& os);
 protected:
-	// AssocVector cost:
-	// O(N) to insert/delete 
-	// and O(lgN) to search
 	typedef std::vector<absField*> StorageType;
 
 public:
@@ -167,11 +163,6 @@ public:
 		
 		iter = cp.vals_.begin();
 		while(iter != cp.vals_.end()){
-			/*
-			if(vals_.find(iter->first) != vals_.end()){
-				delete vals_[iter->first];	
-			}
-			*/
 			vals_.push_back((*iter)->Clone());
 			++iter;
 		}
@@ -188,7 +179,12 @@ public:
 		vals_.clear();
 	}
 
-
+	/** Get reference of field value
+	 *  @tparam T Type of the field value
+	 *  @param field_name
+	 *  @return Reference of value of field
+	 *  @remark Throw exception when T was not matched.
+	 */
 	template<typename T>
 	typename field<T>::value_type& 
 	get(char const* field_name) throw(char const*)
@@ -199,7 +195,12 @@ public:
 		return (p->val_);
 	}
 	
-
+	/** Get constant reference of field value
+	 *  @tparam T Type of the field value
+	 *  @param field_name
+	 *  @return Constant reference of value of field
+	 *  @remark Throw exception when T was not matched.
+	 */
 	template<typename T>
 	typename field<T>::value_type const&
 	get(char const* field_name) const throw(char const*)
@@ -212,6 +213,12 @@ public:
 
 	}
 	
+	/** Set value according to given field name and value of type T.
+	 *  @tparam T Type of the field value
+	 *  @param field_value
+	 *  @param val Value of type T
+	 *  @remark Throw exception (via get<T>(field_name)) when T was not matched
+	 */
 	template<typename T>
 	void 
 	set(char const* field_name, T const & val)
@@ -219,35 +226,59 @@ public:
 		get<T>(field_name) = val;	
 	}
 
-	// from/to string methods are provided for
-	// convinentness, they cost extra allocation
-	// for a local stringstream.
-	// To use a external stringsteram and access
-	// field via record::get<T> is recommanded.
+	/** Set field value converted from text.
+	 *  @param field_name
+	 *  @param cstr
+	 *  @param size
+	 *  @return True for conversion successed. False for failure.
+	 */
 	bool 
 	fromString(char const* field_name, char const *cstr, size_t size)
 	{
 		return vals_[schema_->find(field_name)]->fromString(cstr, size);
 	}
+
 	
+	/** C-string version of fromString(char const*, char const*, size_t)
+	 */
 	bool 
 	fromString(char const* field_name, char const* str)
 	{
 		return vals_[schema_->find(field_name)]->fromString(str);	
 	}
 
-	
+	/** toString methods are provided for
+	 * convinentness, they cost extra allocation
+	 * for a local stringstream.
+	 * To use a external stringsteram and access
+	 * field via record::get<T> is recommanded.
+	 */
 	std::string 
 	toString(char const* field_name) const
 	{
 		return vals_[schema_->find(field_name)]->toString();	
 	}
 	
+	/** Write field value in text format to given output stream
+	 *  @param os
+	 *  @param field_name
+	 *  @return os
+	 */
 	std::ostream&
 	writeTo(std::ostream& os, char const* field_name) const
 	{	return vals_[schema_->find(field_name)]->writeTo(os);  }
 
-	int 
+	/** Compare specified fields of two records.
+	 * @param field_name
+	 * @param rhs compared record
+	 * @return As follows:<br/>
+	 * @code
+	 *  0 - Equal
+	 *  1 - larger
+	 * -1 - less
+	 * -2 - uncomparable
+	 * @endcode
+	 */	int 
 	compare(char const *field_name, record const & rhs) const
 	{
 		assert(0 != schema_);
@@ -255,8 +286,9 @@ public:
 	}
 	
 	/** Compare a field with value of type given
+	 * @tparam T Type of field value
 	 * @param field_name
-	 * @param rhs Value of type T(template parameter)
+	 * @param rhs Value of type T
 	 * @return As follows:<br/>
 	 * @code
 	 *  0 - Equal
@@ -284,19 +316,29 @@ public:
 
 	typedef StorageType::iterator iterator;
 	typedef StorageType::const_iterator const_iterator;
-
+	
+	/** Get begin iterator of fields
+	 *  @return iterator
+	 */
 	StorageType::iterator
 	begin()
 	{ return vals_.begin(); }
 
+	/** Get end iterator of fields
+	 *  @return iterator
+	 */
 	StorageType::iterator
 	end()
 	{ return vals_.end();	}
 
+	/** Get constant begin iterator
+	 */
 	StorageType::const_iterator
 	const_begin() const
 	{ return vals_.begin(); }
 
+	/** Get constant end iterator
+	 */
 	StorageType::const_iterator
 	const_end() const
 	{ return vals_.end();	}
