@@ -1,5 +1,6 @@
 #include "GAISUtils/record.h"
 #include <iostream>
+#include <string>
 
 int main()
 {
@@ -24,6 +25,9 @@ int main()
 		r.get<std::string>("@U:") = "abd";
 		r.get<int>("@s:") = 1234;
 		
+		r.set<std::string>("@U:", "abd"); // equalevent
+		r.set<int>("@s:", 1234);
+		
 		// output
 		cout<<r.toString("@U:")<<endl;
 		cout<<r.toString("@s:")<<endl;
@@ -35,6 +39,16 @@ int main()
 		// output via write to ostream directly
 		r.writeTo(cout, "@U:");
 		r.writeTo(cout, "@s:");
+		
+		// compare methods
+		bool cmpRt;
+		cout<<"compare @s field with value 123"<<endl;
+		cmpRt = r.compare<int>("@s:", 123) > 0; // cmpRt == true
+		cout<<"compare result: "<<cmpRt<<endl;
+		
+		cout<<"compare @s field with another record (itself actually).";
+		cmpRt = r.compare("@s:", r) == 0; // cmpRt == true
+		cout<<"compare result: "<<cmpRt<<endl;
 
 	}catch(char const* msg){
 		printf(msg);
