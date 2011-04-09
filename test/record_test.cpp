@@ -1,6 +1,7 @@
 #include "GAISUtils/record.h"
 #include <iostream>
 #include <string>
+#include <sstream>
 
 int main()
 {
@@ -39,7 +40,8 @@ int main()
 		// output via write to ostream directly
 		r.writeTo(cout, "@U:");
 		r.writeTo(cout, "@s:");
-		
+		cout<<"\n";
+
 		// compare methods
 		bool cmpRt;
 		cout<<"compare @s field with value 123"<<endl;
@@ -50,8 +52,18 @@ int main()
 		cmpRt = r.compare("@s:", r) == 0; // cmpRt == true
 		cout<<"compare result: "<<cmpRt<<endl;
 
+		// schema serialization test
+		stringstream ss;
+		cout<<"serialized scheam\n"<<schema;
+		ss<<schema;
+		cout<<"deserialzation\n";
+		rschema tmpSch;
+		ss>>tmpSch;
+		cout<<tmpSch;
+
 	}catch(char const* msg){
 		printf(msg);
 
 	}
+
 }
