@@ -131,7 +131,7 @@ rschema::find(FIELD_INDEX field_index) const
 
 void
 rschema::make(record& r)
-{	r = *proto_;	}
+{	r = *proto_; r.schema_ver_ = version();	}
 
 unsigned int
 rschema::field_count() const

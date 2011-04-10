@@ -23,7 +23,7 @@ class absField
 public:
 	virtual absField* Clone() const = 0;
 	virtual ~absField(){}
-	virtual int compare(absField const* rhs) const = 0;
+	virtual int compare(absField const* rhs, bool) const = 0;
 	virtual bool fromString(char const *cstr, size_t size) = 0;
 	virtual bool fromString(char const *str) = 0;
 	virtual std::string toString() const = 0;
@@ -38,34 +38,26 @@ struct create_field;
 template<typename T>
 class field : public absField, public Loki::SmallObject<>
 {
-private: // Client (out of GAISUtils lib) never creates field object directly
-	friend class record;
-	template<class T1> friend struct create_field;
-
-	typedef T value_type;
-
-	field()
-	: val_()
-	{}
-
-	field(field const &cp)
-	: val_(cp.val_)
-	{}
-
-	~field()
-	{}
-
-	field* 
-	Clone() const
-	{ return new field(*this); }
-
-	int 
-	compare(absField const* rhs) const throw(char const*)
+public:
+	field& 
+	operator=(field const & cp)
 	{
 		field* p = 
 			dynamic_cast<field*>(
-				const_cast<absField*>(rhs)
+				const_cast<absField*>(cp)
 			);
+		if(p) val_ = p->val_;
+
+		return *this;
+	}
+
+	int 
+	compare(absField const* rhs, bool sameType = false) const 
+	throw(char const*)
+	{
+		field* p = (sameType) ? 
+			static_cast<field*>(const_cast<absField*>(rhs))
+			: dynamic_cast<field*>(	const_cast<absField*>(rhs));
 
 		if(0 == p)
 			return -2;
@@ -106,6 +98,28 @@ private: // Client (out of GAISUtils lib) never creates field object directly
 	writeTo(std::ostream &os) const
 	{ os<<val_; return os;}
 
+private: // Client (out of GAISUtils lib) never creates field object directly
+	friend class record;
+	template<class T1> friend struct create_field;
+
+	typedef T value_type;
+
+	field()
+	: val_()
+	{}
+
+	field(field const &cp)
+	: val_(cp.val_)
+	{}
+
+	~field()
+	{}
+
+	field* 
+	Clone() const
+	{ return new field(*this); }
+
+	
 	T val_;
 };
 
@@ -152,15 +166,18 @@ public:
 	{
 		if(this == &cp)
 			return *this;
+	
 		StorageType::iterator iter(vals_.begin());
-		while(iter != vals_.end()){
-			delete (*iter);
-			++iter;
-		}
-		vals_.clear();
+		if(!isSameSchema(cp)){
+			while(iter != vals_.end()){
+				delete (*iter);
+				++iter;
+			}
+			vals_.clear();
 
-		schema_ = cp.schema_;
-		
+			schema_ = cp.schema_;
+		}
+
 		iter = cp.vals_.begin();
 		while(iter != cp.vals_.end()){
 			vals_.push_back((*iter)->Clone());
@@ -282,7 +299,8 @@ public:
 	compare(char const *field_name, record const & rhs) const
 	{
 		assert(0 != schema_);
-		return vals_[schema_->find(field_name)]->compare(rhs.vals_[rhs.schema_->find(field_name)]);
+		return vals_[schema_->find(field_name)]->
+			compare( rhs.vals_[rhs.schema_->find(field_name)], isSameSchema(rhs) );
 	}
 	
 	/** Compare a field with value of type given
@@ -345,11 +363,20 @@ public:
 	
 
 protected:
+	
+	bool
+	isSameSchema(record const &r) const
+	{ 
+		return schema_ == r.schema_ && 
+			schema_ver_ == r.schema_->version(); 
+	}
+private:
 	// fields layout can be fixed
 	// different record fields layouts can be centrialized
 	// to a single(ton) manager
  	mutable StorageType vals_;
 	rschema *schema_;
+	unsigned int schema_ver_;
 };
 
 
