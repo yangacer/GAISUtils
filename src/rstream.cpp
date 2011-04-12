@@ -5,12 +5,12 @@ size_t const searchablebuf::npos((size_t)-1);
 
 //------------ basic rio class impl ------------------
 basic_rio::basic_rio()
-: pattern_(0), psize_(0)
+: max_rec_size_(0), pattern_(0), psize_(0)
 {}
 
 
 basic_rio::basic_rio(char const *begin_pat, size_t psize)
-: pattern_(0), psize_(0)
+: max_rec_size_(0), pattern_(0), psize_(0)
 {
 	begin_pattern(begin_pat, psize);
 }
@@ -34,7 +34,9 @@ basic_rio::begin_pattern ( char const* pattern, size_t psize )
 	pattern_[psize] = 0;
 }
 
-
+size_t
+basic_rio::maximal_record() const
+{ return max_rec_size_; }
 
 
 //------------ irstream class implementation -----------------------
@@ -115,6 +117,7 @@ irstream::getrecord(char* output, size_t size)
 					peek();
 					if(eof()){
 						output[output_off] = 0;
+						basic_rio::max_rec_size_ = std::max(output_off, maximal_record());
 						return *this;
 					}
 					goto Dispatch;
@@ -146,6 +149,7 @@ irstream::getrecord(char* output, size_t size)
 				output_off += pos;
 				ignore(psize());
 				state_ = PMATCH;
+				basic_rio::max_rec_size_ = std::max(output_off, maximal_record());
 				return *this;
 			}
 			break;
@@ -190,6 +194,7 @@ irstream::getrecord(char const** beg)
 				return mybuf->buf_end() - *beg;			
 			}
 			output_off = end - *beg;
+			basic_rio::max_rec_size_ = std::max(output_off, maximal_record());
 			return end - *beg;
 			break;
 

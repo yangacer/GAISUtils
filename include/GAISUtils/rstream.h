@@ -139,7 +139,12 @@ public:
 	void 
 	begin_pattern ( char const* pattern, size_t psize );
 	
-		
+	/** Get maximal record size had been seen so far.
+	 */
+	size_t
+	maximal_record() const;
+protected:
+	size_t max_rec_size_;
 private:
 	basic_rio(basic_rio const &cp);
 	basic_rio& operator=(basic_rio const &cp);

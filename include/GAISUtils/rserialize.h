@@ -27,6 +27,8 @@ toGAISRecord(record const &r, std::ostream& os)
 
 	for(unsigned int i=0; i< (unsigned int)r.schema_->field_count();++i){
 		field_name = r.schema_->find(i);
+		if(field_name[0] && field_name[1] && field_name[0] == field_name[0] && field_name[0] == '_')
+			continue;
 		os<<field_name;
 		r.writeTo(os, field_name);
 		os<<"\n";

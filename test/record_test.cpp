@@ -2,6 +2,25 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <cmath>
+
+int
+stricmp(std::string const &lhs, std::string const &rhs)
+{
+	/*
+	std::string::size_type i = 0;
+		n = lhs.size() > rhs.size() ? rhs.size() : lhs.size();
+
+	const int diff = 'a' - 'A';
+	int result = 0;
+	while(i<n && lhs[i] == rhs[i]){
+		result = lhs[i] - rhs[i];
+
+		i++;
+	}
+	*/
+	
+}
 
 int main()
 {

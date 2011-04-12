@@ -21,9 +21,11 @@
 class absField
 {
 public:
+
 	virtual absField* Clone() const = 0;
 	virtual ~absField(){}
 	virtual int compare(absField const* rhs, bool) const = 0;
+	virtual int compare(absField const* rhs, void* compare, bool) const = 0;
 	virtual bool fromString(char const *cstr, size_t size) = 0;
 	virtual bool fromString(char const *str) = 0;
 	virtual std::string toString() const = 0;
@@ -38,6 +40,8 @@ struct create_field;
 template<typename T>
 class field : public absField, public Loki::SmallObject<>
 {
+
+	typedef int(*CompareFunc)(T const&, T const&);
 public:
 	field& 
 	operator=(field const & cp)
@@ -68,6 +72,18 @@ public:
 		return 0;
 	}
 	
+	int
+	compare(absField const *rhs, void* cmp, bool sameType = false) const
+	throw(char const*)
+	{
+		field* p = (sameType) ? 
+			static_cast<field*>(const_cast<absField*>(rhs))
+			: dynamic_cast<field*>(	const_cast<absField*>(rhs));
+
+		return ((CompareFunc)cmp)(this->val_, p->val_);
+	}
+	
+
 	bool 
 	fromString(char const *cstr, size_t size)
 	{
@@ -142,9 +158,8 @@ class record
 	friend std::ostream& toGAISRecord(record const& r, std::ostream& os);
 protected:
 	typedef std::vector<absField*> StorageType;
-
 public:
-	
+
 	record()
 	: schema_(0)
 	{}
@@ -295,7 +310,8 @@ public:
 	 * -1 - less
 	 * -2 - uncomparable
 	 * @endcode
-	 */	int 
+	 */	
+	int 
 	compare(char const *field_name, record const & rhs) const
 	{
 		assert(0 != schema_);
@@ -303,6 +319,13 @@ public:
 			compare( rhs.vals_[rhs.schema_->find(field_name)], isSameSchema(rhs) );
 	}
 	
+	int
+	compare(char const *field_name, record const& rhs, void* compare)
+	{
+		return vals_[schema_->find(field_name)]->
+			compare( rhs.vals_[rhs.schema_->find(field_name)], compare, isSameSchema(rhs) );
+	}
+
 	/** Compare a field with value of type given
 	 * @tparam T Type of field value
 	 * @param field_name
@@ -326,6 +349,19 @@ public:
 			if(lhs > rhs)
 				return 1;
 			return 0;
+		}catch(...){
+			return 	-2;
+		}
+		return -2;
+	}
+	
+	template<typename T>
+	int
+	compare(char const* field_name, T const &rhs, void* compare) const
+	{
+		try{
+			T const &lhs = get<T>(field_name);
+			return ((typename field<T>::CompareFunc)compare)(lhs, rhs);
 		}catch(...){
 			return 	-2;
 		}
