@@ -172,7 +172,7 @@ public:
 		if(this == &cp)
 			return *this;
 	
-		StorageType::iterator iter(vals_.begin());
+		StorageType::iterator iter(vals_.begin()), myIter;
 		if(!isSameSchema(cp)){
 			while(iter != vals_.end()){
 				delete (*iter);
@@ -182,11 +182,16 @@ public:
 
 			schema_ = cp.schema_;
 			schema_ver_ = cp.schema_ver_;
+			iter = cp.vals_.begin();
+			while(iter != cp.vals_.end()){
+				vals_.push_back((*iter)->Clone());
+				++iter;
+			}
 		}
-
+		myIter = vals_.begin();
 		iter = cp.vals_.begin();
 		while(iter != cp.vals_.end()){
-			vals_.push_back((*iter)->Clone());
+			*myIter = (**iter)->Clone();
 			++iter;
 		}
 		return *this;
