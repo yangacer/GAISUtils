@@ -191,7 +191,7 @@ public:
 		myIter = vals_.begin();
 		iter = cp.vals_.begin();
 		while(iter != cp.vals_.end()){
-			*myIter = (**iter)->Clone();
+			*myIter = (*iter)->Clone();
 			++iter;
 		}
 		return *this;
