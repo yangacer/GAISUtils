@@ -252,9 +252,12 @@ irfstream::open(char const* filename, std::ios_base::openmode mode)
 {
 	if(!rdbuf()->open(filename, mode | ios_base::in))
 		setstate(ios_base::failbit);
-	else
+	else{
+		irstream::rdbuf(fbuf_);
 		clear();
-	
+		research();
+	}
+
 }
 
 void 
@@ -370,9 +373,10 @@ orfstream::open(char const* filename, std::ios_base::openmode mode)
 {
 	if(!rdbuf()->open(filename, mode | ios_base::out))
 		setstate(ios_base::failbit);
-	else
+	else{
 		clear();
-	
+		orstream::rdbuf(fbuf_);
+	}
 }
 
 void 
@@ -477,8 +481,11 @@ rfstream::open(char const* filename, std::ios_base::openmode mode)
 {
 	if(!fbuf_.open(filename, mode | ios_base::in | ios_base::out))
 		setstate(ios_base::failbit);
-	else
+	else{
+		// TODO
+		// rstream::rdbuf(fbuf_);
 		clear();
+	}
 }
 
 void 

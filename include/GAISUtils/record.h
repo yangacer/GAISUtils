@@ -394,7 +394,7 @@ protected:
 	isSameSchema(record const &r) const
 	{ 
 		return schema_ == r.schema_ && 
-			schema_ver_ == r.schema_->version(); 
+			schema_ver_ == r.schema_ver_; 
 	}
 private:
 	// fields layout can be fixed
