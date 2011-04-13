@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <iosfwd>
+//#include <map>
 #include "loki/AssocVector.h"
 
 typedef unsigned char FIELD_INDEX;
@@ -46,13 +47,13 @@ struct rschema
 	name(char const*);
 
 	FIELD_INDEX
-	find(char const* field_name) const;
+	find(std::string const& field_name) const;
 	
 	char const*
 	find(FIELD_INDEX field_index) const;
 
 	void
-	make(record& r);
+	make(record& r) const;
 	
 	unsigned int
 	field_count() const;

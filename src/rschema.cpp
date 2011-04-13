@@ -108,7 +108,7 @@ rschema::undefine_field(char const* field_name)
 }
 
 FIELD_INDEX
-rschema::find(char const* field_name) const
+rschema::find(std::string const& field_name) const
 {
 	Index::const_iterator iter = idx_.find(field_name);
 	if(iter == idx_.end()){
@@ -130,7 +130,7 @@ rschema::find(FIELD_INDEX field_index) const
 }
 
 void
-rschema::make(record& r)
+rschema::make(record& r) const
 {	r = *proto_; r.schema_ver_ = version();	}
 
 unsigned int

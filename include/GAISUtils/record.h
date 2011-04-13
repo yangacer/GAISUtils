@@ -139,7 +139,6 @@ typedef Loki::SingletonHolder
 	> field_factory;
 
 
-void fromGAISRecord(record& r, char const* raw, unsigned int rsize);
 
 /// Multiple Typed Fields Record
 class record
@@ -156,7 +155,7 @@ public:
 	{}
 	
 	record(record const &cp)
-	: schema_(cp.schema_)
+	: schema_(cp.schema_), schema_ver_(cp.schema_ver_)
 	{
 		if(this != &cp){
 			StorageType::iterator iter(cp.vals_.begin());
@@ -182,6 +181,7 @@ public:
 			vals_.clear();
 
 			schema_ = cp.schema_;
+			schema_ver_ = cp.schema_ver_;
 		}
 
 		iter = cp.vals_.begin();
@@ -387,15 +387,21 @@ public:
 	const_end() const
 	{ return vals_.end();	}
 	
+	rschema
+	schema() const
+	{ return rschema(*schema_); } 
 
-protected:
-	
 	bool
 	isSameSchema(record const &r) const
 	{ 
 		return schema_ == r.schema_ && 
 			schema_ver_ == r.schema_ver_; 
 	}
+
+	absField const*
+	operator[](FIELD_INDEX i) const
+	{ return vals_[i]; }
+
 private:
 	// fields layout can be fixed
 	// different record fields layouts can be centrialized
