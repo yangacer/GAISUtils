@@ -49,8 +49,10 @@ toGAISRecord(record const &r, std::ostream& os)
 	while(fIter != r.schema_->end()){
 		if(fIter->first[0] && fIter->first[1] && 
 			fIter->first[0] == fIter->first[0] && 
-			fIter->first[0] == '_' )
+			fIter->first[0] == '_' ){
+			++fIter;
 			continue;
+		}
 		os<<fIter->first;
 		r.vals_[fIter->second]->writeTo(os);
 		++fIter;	
