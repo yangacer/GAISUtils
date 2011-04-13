@@ -27,7 +27,8 @@ struct rschema
 
 	typedef IndexCont<std::string, FIELD_INDEX>::Type Index;
 	typedef IndexCont<FIELD_INDEX, std::string>::Type InvertIndex;
-	
+	typedef Index::const_iterator iterator;
+
 	rschema();
 	
 	rschema(char const *name);
@@ -58,6 +59,12 @@ struct rschema
 	
 	unsigned int
 	version() const;
+
+	Index::const_iterator
+	begin() const;
+	
+	Index::const_iterator
+	end() const;
 private:
 	Index idx_;
 	InvertIndex ridx_, types_;	

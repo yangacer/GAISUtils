@@ -43,17 +43,6 @@ class field : public absField, public Loki::SmallObject<>
 
 	typedef int(*CompareFunc)(T const&, T const&);
 public:
-	field& 
-	operator=(field const & cp)
-	{
-		field* p = 
-			dynamic_cast<field*>(
-				const_cast<absField*>(cp)
-			);
-		if(p) val_ = p->val_;
-
-		return *this;
-	}
 
 	int 
 	compare(absField const* rhs, bool sameType = false) const 
@@ -120,6 +109,7 @@ private: // Client (out of GAISUtils lib) never creates field object directly
 
 	typedef T value_type;
 
+	
 	field()
 	: val_()
 	{}
@@ -130,6 +120,7 @@ private: // Client (out of GAISUtils lib) never creates field object directly
 
 	~field()
 	{}
+	
 
 	field* 
 	Clone() const
@@ -314,7 +305,6 @@ public:
 	int 
 	compare(char const *field_name, record const & rhs) const
 	{
-		assert(0 != schema_);
 		return vals_[schema_->find(field_name)]->
 			compare( rhs.vals_[rhs.schema_->find(field_name)], isSameSchema(rhs) );
 	}

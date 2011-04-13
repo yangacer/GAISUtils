@@ -141,4 +141,10 @@ unsigned int
 rschema::version() const
 { return version_; }
 
+rschema::iterator
+rschema::begin() const
+{ return idx_.begin(); }
 
+rschema::iterator
+rschema::end() const
+{ return idx_.end(); }
