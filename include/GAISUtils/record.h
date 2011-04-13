@@ -193,6 +193,7 @@ public:
 		while(iter != cp.vals_.end()){
 			*myIter = (*iter)->Clone();
 			++iter;
+			++myIter;
 		}
 		return *this;
 	}
