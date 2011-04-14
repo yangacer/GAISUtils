@@ -23,6 +23,7 @@ class absField
 public:
 
 	virtual absField* Clone() const = 0;
+	virtual void Clone(absField* f) const=0;
 	virtual ~absField(){}
 	virtual int compare(absField const* rhs, bool) const = 0;
 	virtual int compare(absField const* rhs, void* compare, bool) const = 0;
@@ -125,8 +126,11 @@ private: // Client (out of GAISUtils lib) never creates field object directly
 	field* 
 	Clone() const
 	{ return new field(*this); }
-
 	
+	void
+	Clone(absField* f) const
+	{ new (f) field<T>(*this); }
+
 	T val_;
 };
 
@@ -173,7 +177,8 @@ public:
 			return *this;
 	
 		StorageType::iterator iter(vals_.begin()), myIter;
-		if(!isSameSchema(cp)){
+		
+		if(vals_.size() != cp.vals_.size() || !isSameSchema(cp)){
 			while(iter != vals_.end()){
 				delete (*iter);
 				++iter;
@@ -187,14 +192,18 @@ public:
 				vals_.push_back((*iter)->Clone());
 				++iter;
 			}
+		
+		}else{
+			myIter = vals_.begin();
+			iter = cp.vals_.begin();
+			while(iter != cp.vals_.end()){
+				(*iter)->Clone(*myIter);
+				++iter;
+				++myIter;
+			}
 		}
-		myIter = vals_.begin();
-		iter = cp.vals_.begin();
-		while(iter != cp.vals_.end()){
-			*myIter = (*iter)->Clone();
-			++iter;
-			++myIter;
-		}
+		
+
 		return *this;
 	}
 	
