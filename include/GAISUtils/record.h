@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 
+
 class absField
 {
 public:
@@ -104,6 +105,8 @@ public:
 	writeTo(std::ostream &os) const
 	{ os<<val_; return os;}
 
+	T val_;
+
 private: // Client (out of GAISUtils lib) never creates field object directly
 	friend class record;
 	template<class T1> friend struct create_field;
@@ -131,7 +134,6 @@ private: // Client (out of GAISUtils lib) never creates field object directly
 	Clone(absField* f) const
 	{ new (f) field<T>(*this); }
 
-	T val_;
 };
 
 /// Field Factory
