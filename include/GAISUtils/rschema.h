@@ -39,6 +39,9 @@ struct rschema
 	
 	rschema&
 	undefine_field(char const* field_name);
+	
+	bool
+	isSameSchema(record const &r) const;
 
 	char const*
 	name() const;

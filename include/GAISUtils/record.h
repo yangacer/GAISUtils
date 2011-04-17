@@ -182,7 +182,7 @@ public:
 			myIter(vals_.begin());
 
 		// lazy schema checking
-		if(vals_.size() != cp.vals_.size() || !isSameSchema(cp)){
+		if(vals_.size() != cp.vals_.size() || !schema_->isSameSchema(cp)){
 			while(myIter != vals_.end()){
 				delete (*myIter);
 				++myIter;
@@ -323,14 +323,16 @@ public:
 	compare(char const *field_name, record const & rhs) const
 	{
 		return vals_[schema_->find(field_name)]->
-			compare( rhs.vals_[rhs.schema_->find(field_name)], isSameSchema(rhs) );
+			compare( rhs.vals_[rhs.schema_->find(field_name)], 
+				schema_->isSameSchema(rhs) );
 	}
 	
 	int
 	compare(char const *field_name, record const& rhs, void* compare)
 	{
 		return vals_[schema_->find(field_name)]->
-			compare( rhs.vals_[rhs.schema_->find(field_name)], compare, isSameSchema(rhs) );
+			compare( rhs.vals_[rhs.schema_->find(field_name)], 
+				compare, schema_->isSameSchema(rhs) );
 	}
 
 	/** Compare a field with value of type given
@@ -407,13 +409,15 @@ public:
 	rschema
 	schema() const
 	{ return rschema(*schema_); } 
-
+	
+	/*
 	bool
 	isSameSchema(record const &r) const
 	{ 
 		return schema_ == r.schema_ && 
 			schema_ver_ == r.schema_ver_; 
 	}
+	*/
 
 	absField const*
 	operator[](FIELD_INDEX i) const

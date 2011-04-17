@@ -92,6 +92,10 @@ rschema::define_field(char const* field_name, char const* type_str)
 
 }
 
+bool
+rschema::isSameSchema(record const &r) const
+{ return r.schema_ == this && r.schema_ver_ == version_; }
+
 rschema&
 rschema::undefine_field(char const* field_name)
 {
