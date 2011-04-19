@@ -1,4 +1,5 @@
 #include "GAISUtils/rstream.h"
+#include "GAISUtils/streambuf_adaptor.h"
 #include <iostream>
 
 void usage()
@@ -84,6 +85,11 @@ int main(int argc, char** argv)
 	*/
 
 	irstringstream sin("@\n", 2, "@\n@s:5467\n");
+	
+	FILE* fp = fopen(argv[1], "rb");
+	setvbuf(fp, new char[1024], _IOFBF, 1024);
+	GUtils::filebuf fb(fp, std::ios::in, 1024);
+	printf("buf size: %d\n", fb.max_size());
 
 	return 0;	
 }

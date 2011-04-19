@@ -3,6 +3,9 @@
 #include <string>
 #include <sstream>
 #include <cmath>
+#include <typeinfo>
+
+#include "GAISUtils/fieldTypes.h"
 
 int
 stricmp(std::string const &lhs, std::string const &rhs)
@@ -60,7 +63,7 @@ int main()
 		r.writeTo(cout, "@U:");
 		r.writeTo(cout, "@s:");
 		cout<<"\n";
-
+		
 		// compare methods
 		bool cmpRt;
 		cout<<"compare @s field with value 123"<<endl;
@@ -84,5 +87,9 @@ int main()
 		printf(msg);
 
 	}
-
+	
+	
+	cout<<typeid(int).name()<<"=="<<typeid(Loki::TL::TypeAt<SupportedTypes, 0>::Result::value_type).name()<<endl;
+	cout<<typeid(Loki::TL::TypeAt<SupportedTypes, 1>::Result::value_type).name()<<endl;
+	cout<<typeid(Loki::TL::TypeAt<SupportedTypes, 2>::Result::value_type).name()<<endl;
 }

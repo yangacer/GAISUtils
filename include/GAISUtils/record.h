@@ -11,6 +11,7 @@
 #include "mem_helper.h"
 #include "small_vector.h"
 #include "rschema.h"
+#include "rvisitor.h"
 
 #include <cstring>
 #include <sstream>
@@ -19,7 +20,7 @@
 #include <vector>
 
 
-class absField
+class absField 
 {
 public:
 
@@ -32,6 +33,7 @@ public:
 	virtual bool fromString(char const *str) = 0;
 	virtual std::string toString() const = 0;
 	virtual std::ostream &writeTo(std::ostream &os) const = 0;
+	virtual void Accept(StrVisitor&){}
 };
 
 class record;
@@ -45,6 +47,7 @@ class field : public absField, public Loki::SmallObject<>
 
 	typedef int(*CompareFunc)(T const&, T const&);
 public:
+	LOKI_DEFINE_CYCLIC_VISITABLE(StrVisitor);
 
 	int 
 	compare(absField const* rhs, bool sameType = false) const 
@@ -107,11 +110,11 @@ public:
 
 	T val_;
 
+	typedef T value_type;
 private: // Client (out of GAISUtils lib) never creates field object directly
 	friend class record;
 	template<class T1> friend struct create_field;
 
-	typedef T value_type;
 
 	
 	field()
