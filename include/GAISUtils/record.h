@@ -6,12 +6,12 @@
 #endif
 
 #include "loki/Factory.h"
+#include "loki/Visitor.h"
 #include "loki/AssocVector.h"
 #include "loki/SmallObj.h"
 #include "mem_helper.h"
 #include "small_vector.h"
 #include "rschema.h"
-#include "rvisitor.h"
 
 #include <cstring>
 #include <sstream>
@@ -19,8 +19,12 @@
 #include <string>
 #include <vector>
 
+#define DEFINE_VISITABLE(T) \
+	virtual T::ReturnType Accept(::Loki::BaseVisitor& guest) \
+	{ return AcceptImpl(*this, guest); }
 
-class absField 
+class absField : 
+public Loki::BaseVisitable<>
 {
 public:
 
@@ -33,8 +37,20 @@ public:
 	virtual bool fromString(char const *str) = 0;
 	virtual std::string toString() const = 0;
 	virtual std::ostream &writeTo(std::ostream &os) const = 0;
-	virtual void Accept(StrVisitor&){}
+	
+	DEFINE_VISITABLE(Loki::BaseVisitable<>);
+
 };
+
+namespace Private
+{
+	// overload operator>> for field<std::string>
+	inline std::stringstream& operator>>(std::stringstream &ss, std::string& str)
+	{
+		str = ss.str();
+		return ss;	
+	}	
+}
 
 class record;
 
@@ -47,7 +63,8 @@ class field : public absField, public Loki::SmallObject<>
 
 	typedef int(*CompareFunc)(T const&, T const&);
 public:
-	LOKI_DEFINE_CYCLIC_VISITABLE(StrVisitor);
+	
+	DEFINE_VISITABLE(Loki::BaseVisitable<>);
 
 	int 
 	compare(absField const* rhs, bool sameType = false) const 
@@ -81,6 +98,8 @@ public:
 	bool 
 	fromString(char const *cstr, size_t size)
 	{
+		using namespace Private;
+
 		std::stringstream cvt;
 		cvt.write(cstr, size);
 		cvt>>val_;
@@ -90,6 +109,8 @@ public:
 	bool 
 	fromString(char const *str)
 	{
+		using namespace Private;
+
 		std::stringstream cvt(str);
 		cvt>>val_;
 		return (bool)cvt;
@@ -221,6 +242,10 @@ public:
 		}
 		vals_.clear();
 	}
+
+	absField*
+	operator[](char const* field_name)
+	{ return vals_[schema_->find(field_name)]; }
 
 	/** Get reference of field value
 	 *  @tparam T Type of the field value
