@@ -1,5 +1,7 @@
 include_directories ( ${PROJECT_SOURCE_DIR}/include/GAISUtils 
-		${PROJECT_SOURCE_DIR}/loki/include)
+		${PROJECT_SOURCE_DIR}/loki/include
+		/usr/local/include )
+
 link_directories (${PROJECT_SOURCE_DIR}/loki/src)
 
 # Allow the developer to select if Dynamic or Static libraries are built

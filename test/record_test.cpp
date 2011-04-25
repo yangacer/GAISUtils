@@ -6,6 +6,8 @@
 #include <typeinfo>
 
 #include "GAISUtils/fieldTypes.h"
+#include "GAISUtils/re2_visitor.h"
+
 
 int
 stricmp(std::string const &lhs, std::string const &rhs)
@@ -88,8 +90,30 @@ int main()
 
 	}
 	
-	
+	// Supported Types Check
 	cout<<typeid(int).name()<<"=="<<typeid(Loki::TL::TypeAt<SupportedTypes, 0>::Result::value_type).name()<<endl;
 	cout<<typeid(Loki::TL::TypeAt<SupportedTypes, 1>::Result::value_type).name()<<endl;
 	cout<<typeid(Loki::TL::TypeAt<SupportedTypes, 2>::Result::value_type).name()<<endl;
+
+	// Visitor check
+	try{
+		record r;
+		rschema schema;
+		schema.define_field("data", "STR");
+		schema.define_field("id", "UINT");
+		
+		schema.make(r);
+
+		r.fromString("data", "xxx<a   href=\"http://link1\">\r\n");
+		r.fromString("id", "234");
+		RE2_BIND::FindAndConsume fac("(?ims)(?:\\<a([^\\>]+)href=\\\")([^\\\"]+)\\\"", r["data"]);
+		std::string match;
+		while(fac((string*)0, &match)){
+			printf("Matched: %s\n", match.c_str());	
+		}
+
+	}catch(char const* msg){
+		printf(msg);
+	}
+
 }
