@@ -67,7 +67,7 @@ public:
 // methods to acquire finalized result
   unsigned char    *raw_digest ();  // digest as a 16-byte binary array
   void		    raw_digest (std::string &output);
-
+  unsigned char	const *raw() const;
   char *            hex_digest ();  // digest as a 33-byte ascii-hex string
   void		    hex_digest (char *output);
   void		    hex_digest (std::string &output);

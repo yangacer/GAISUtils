@@ -256,7 +256,9 @@ MD5::MD5(std::ifstream& stream){
   finalize();
 }
 
-
+unsigned char *const 
+MD5::raw() const
+{ return digest; }
 
 unsigned char *MD5::raw_digest(){
   uint1 *s = new uint1[16];
