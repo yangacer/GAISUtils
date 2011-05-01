@@ -19,12 +19,9 @@
 #include <string>
 #include <vector>
 
-#define DEFINE_VISITABLE(T) \
-	virtual T::ReturnType Accept(::Loki::BaseVisitor& guest) \
-	{ return AcceptImpl(*this, guest); }
 
 class absField : 
-public Loki::BaseVisitable<>
+public Loki::BaseVisitable<void, Loki::DefaultCatchAll, true>
 {
 public:
 
@@ -38,7 +35,7 @@ public:
 	virtual std::string toString() const = 0;
 	virtual std::ostream &writeTo(std::ostream &os) const = 0;
 	
-	DEFINE_VISITABLE(Loki::BaseVisitable<>);
+	LOKI_DEFINE_CONST_VISITABLE();
 
 };
 
@@ -64,7 +61,7 @@ class field : public absField, public Loki::SmallObject<>
 	typedef int(*CompareFunc)(T const&, T const&);
 public:
 	
-	DEFINE_VISITABLE(Loki::BaseVisitable<>);
+	LOKI_DEFINE_CONST_VISITABLE();
 
 	int 
 	compare(absField const* rhs, bool sameType = false) const 
@@ -438,15 +435,6 @@ public:
 	schema() const
 	{ return rschema(*schema_); } 
 	
-	/*
-	bool
-	isSameSchema(record const &r) const
-	{ 
-		return schema_ == r.schema_ && 
-			schema_ver_ == r.schema_ver_; 
-	}
-	*/
-
 	absField const*
 	operator[](FIELD_INDEX i) const
 	{ return vals_[i]; }

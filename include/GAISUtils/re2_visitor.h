@@ -8,7 +8,7 @@ namespace RE2_BIND
 {
 	using namespace re2;
 	
-	typedef Loki::Visitor<field<std::string> > StrVisitor;	
+	typedef Loki::Visitor<field<std::string>, void, true> StrVisitor;	
 
 	struct FullMatch : 
 	public Loki::BaseVisitor, 
@@ -19,7 +19,7 @@ namespace RE2_BIND
 		{}
 
 		void
-		Visit(field<std::string> &f)
+		Visit(field<std::string> const &f)
 		{ rt = RE2::FullMatch(f.val_, pattern); }
 		
 		bool operator()(absField *f)
@@ -38,7 +38,7 @@ namespace RE2_BIND
 		{}
 
 		void
-		Visit(field<std::string> &f)
+		Visit(field<std::string> const &f)
 		{ rt = RE2::PartialMatch(f.val_, pattern); }
 		
 		bool operator()(absField *f)
@@ -58,7 +58,7 @@ namespace RE2_BIND
 		{	af->Accept(*this);	}
 
 		void		
-		Visit(field<std::string> &f)
+		Visit(field<std::string> const &f)
 		{ sp.set(f.val_.c_str(), f.val_.size()); }
 
 
