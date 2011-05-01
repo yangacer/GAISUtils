@@ -22,7 +22,7 @@ namespace RE2_BIND
 		Visit(field<std::string> const &f)
 		{ rt = RE2::FullMatch(f.val_, pattern); }
 		
-		bool operator()(absField *f)
+		bool operator()(absField const *f)
 		{ f->Accept(*this); return rt; }
 
 		bool rt;
@@ -41,7 +41,7 @@ namespace RE2_BIND
 		Visit(field<std::string> const &f)
 		{ rt = RE2::PartialMatch(f.val_, pattern); }
 		
-		bool operator()(absField *f)
+		bool operator()(absField const *f)
 		{ f->Accept(*this); return rt; }
 
 		bool rt;
@@ -53,8 +53,12 @@ namespace RE2_BIND
 	public StrVisitor
 	{
 
-		FindAndConsume(char const *pat, absField* af)
+		FindAndConsume(char const *pat, absField const* af = 0)
 		: pattern(pat)
+		{	if(af) af->Accept(*this);	}
+
+		void
+		set_field(absField const * af)
 		{	af->Accept(*this);	}
 
 		void		
@@ -74,7 +78,7 @@ namespace RE2_BIND
 		bool operator()(std::string *s1, std::string *s2, std::string *s3, std::string *s4)
 		{ return RE2::FindAndConsume(&sp, pattern, s1, s2, s3, s4); }
 
-
+		
 		StringPiece sp;
 		RE2 pattern;
 	};
