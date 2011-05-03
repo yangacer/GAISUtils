@@ -12,8 +12,11 @@ typedef unsigned char FIELD_INDEX;
 struct record;
 struct rschema;
 
-std::ostream& operator<<(std::ostream& os, rschema &rs);
-std::istream& operator>>(std::istream& is, rschema &rs);
+namespace GUtils
+{
+	std::ostream& operator<<(std::ostream& os, rschema &rs);
+	std::istream& operator>>(std::istream& is, rschema &rs);
+}
 
 struct rschema 
 {	

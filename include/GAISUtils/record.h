@@ -34,6 +34,7 @@ public:
 	virtual bool fromString(char const *str) = 0;
 	virtual std::string toString() const = 0;
 	virtual std::ostream &writeTo(std::ostream &os) const = 0;
+	virtual std::istream &readFrom(std::istream &is) = 0;
 	
 	LOKI_DEFINE_CONST_VISITABLE();
 
@@ -124,7 +125,13 @@ public:
 	
 	std::ostream&
 	writeTo(std::ostream &os) const
-	{ os<<val_; return os;}
+	{ os<<val_; return os; }
+	
+	std::istream&
+	readFrom(std::istream &is)
+	{ 	
+		return is>>val_;
+	}
 
 	T val_;
 
@@ -332,6 +339,10 @@ public:
 	std::ostream&
 	writeTo(std::ostream& os, char const* field_name) const
 	{	return vals_[schema_->find(field_name)]->writeTo(os);  }
+	
+	std::istream&
+	readFrom(std::istream& is, char const* field_name)
+	{	return vals_[schema_->find(field_name)]->readFrom(is);	}
 
 	/** Compare specified fields of two records.
 	 * @param field_name
